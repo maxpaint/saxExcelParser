@@ -1,21 +1,23 @@
 package com.mdanylenko.excel.context;
 
-import com.mdanylenko.excel.exception.ConfigException;
-import com.mdanylenko.excel.exception.PrepareContextException;
-import com.mdanylenko.excel.parcer.LazySaxExcelParser;
 import com.mdanylenko.excel.annotation.Column;
 import com.mdanylenko.excel.annotation.Sheet;
 import com.mdanylenko.excel.converter.TypeConverter;
+import com.mdanylenko.excel.exception.ConfigException;
+import com.mdanylenko.excel.exception.PrepareContextException;
 import com.mdanylenko.excel.model.ColumnDescription;
 import com.mdanylenko.excel.model.SheetDescription;
-import org.reflections.Reflections;
+import com.mdanylenko.excel.parcer.LazySaxExcelParser;
 
 import java.io.File;
 import java.lang.reflect.Field;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
 
-import static com.mdanylenko.excel.util.StringUtil.isEmpty;
 import static com.mdanylenko.excel.exception.ErrorCode.*;
+import static com.mdanylenko.excel.util.StringUtil.isEmpty;
 
 /**
  * Created by IntelliJ IDEA.<br/>
@@ -31,8 +33,13 @@ public class ExcelContext {
     public static ExcelContext prepareContext(String contextPath) throws PrepareContextException {
         ExcelContext context = new ExcelContext();
 
-        Reflections reflections = new Reflections(contextPath);
-        Set<Class<?>> classes = reflections.getTypesAnnotatedWith(Sheet.class);
+        HelperClassLoader helperClassLoader = HelperClassLoader.loadResorce(contextPath);
+
+        Set<Class<?>> classes = helperClassLoader.getTypesAnnotatedWith(Sheet.class);
+
+        if(classes.isEmpty()){
+            throw new PrepareContextException(String.format(CONTEXT_CLASS_DEFINE, contextPath));
+        }
 
         for(Class<?> claz: classes){
             SheetDescription sheetDescription = new SheetDescription();

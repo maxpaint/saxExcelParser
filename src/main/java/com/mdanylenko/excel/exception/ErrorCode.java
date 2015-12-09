@@ -12,7 +12,8 @@ public class ErrorCode {
     /*
     * CONTEXT
     * */
-
+    public static final String CONTEXT_CLASS_PATH = "Can't find class by this path %s";
+    public static final String CONTEXT_CLASS_DEFINE = "Can't find annotation class by this path %s";
     public static final String CONTEXT_SHEET_DEFINE = "For class: %s you must define sheetName or sheetId";
     public static final String CONTEXT_WRONG_SHEET_DEFINE = "For class: %s you must define one of sheetName or sheetId";
     public static final String CONTEXT_CONVERTER = "For field: %s in class: %s yours converter must implements TypeConverter interface";

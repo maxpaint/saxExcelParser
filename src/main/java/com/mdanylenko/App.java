@@ -14,7 +14,7 @@ import java.util.concurrent.TimeUnit;
 public class App 
 {
 
-    public static void main( String[] args ) throws PrepareContextException, ParserException, ConfigException {
+    public static void main( String[] args ) throws PrepareContextException, ParserException, ConfigException, ClassNotFoundException {
         ExcelContext context = ExcelContext.prepareContext("com.mdanylenko.excel.example.dto");
         SheetParser parser = context.getParserSax("C:\\Users\\maxpaint\\Downloads\\testAnnotations.xlsx");//Main_Data_25-Nov-15_13-11-27 (1) //testAnnotations //
 
