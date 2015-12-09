@@ -3,28 +3,37 @@ package com.mdanylenko.excel.parcer;
 import com.mdanylenko.excel.annotation.Sheet;
 import com.mdanylenko.excel.context.ExcelContext;
 import com.mdanylenko.excel.exception.ConfigException;
+import com.mdanylenko.excel.exception.ErrorCode;
 import com.mdanylenko.excel.exception.ParserException;
 import com.mdanylenko.excel.model.SheetDescription;
 import com.mdanylenko.excel.parcer.handler.SaxSheetHandler;
 import org.apache.poi.POIXMLDocument;
 import org.apache.poi.openxml4j.exceptions.OpenXML4JException;
 import org.apache.poi.openxml4j.opc.OPCPackage;
+import org.apache.poi.openxml4j.opc.PackagePart;
 import org.apache.poi.xssf.eventusermodel.XSSFReader;
 import org.apache.poi.xssf.model.SharedStringsTable;
+import org.xml.sax.Attributes;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
+import org.xml.sax.helpers.DefaultHandler;
 import org.xml.sax.helpers.XMLReaderFactory;
 
+import javax.xml.parsers.SAXParser;
+import javax.xml.parsers.SAXParserFactory;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.stream.Collectors;
 
 import static com.mdanylenko.excel.exception.ErrorCode.FILE_TYPE_ERROR;
 import static com.mdanylenko.excel.util.StringUtil.isEmpty;
+import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 
 /**
@@ -144,19 +153,116 @@ public class LazySaxExcelParser implements SheetParser {
     }
 
     private InputStream getSheetById(int id) throws ParserException {
-        InputStream sheet;
-
         try{
             OPCPackage pkg = OPCPackage.open(file);
-            XSSFReader r = new XSSFReader( pkg );
-            sheet = r.getSheet("rId" + ( id + 1));
-
-        } catch (OpenXML4JException | IOException e) {
+            ArrayList<PackagePart> parts = pkg.getParts();
+            PackagePart workBook = null;
+            for(PackagePart part: parts){
+                if(part.getPartName().getName().endsWith("workbook.xml")){
+                    workBook = part;
+                }
+            }
+            return getSheetByName(findSheetNameById(workBook, id));
+        } catch (OpenXML4JException e) {
             throw new ParserException(e.getMessage(), e);
         }
-
-        return sheet;
     }
+
+
+    private List<SheetDesc> sheetDescs;
+
+    private String findSheetNameById(PackagePart workBook, int id) throws ParserException {
+        if( isNull(sheetDescs) ){
+            SAXParserFactory factory = SAXParserFactory.newInstance();
+            try {
+
+                SAXParser saxParser = factory.newSAXParser();
+                WorkBookHandler handler   = new WorkBookHandler();
+                saxParser.parse(workBook.getInputStream(), handler);
+                sheetDescs = handler.getSheets();
+
+            } catch (Throwable err) {
+                err.printStackTrace ();
+            }
+        }
+
+        for (SheetDesc item: sheetDescs){
+            if( item.getSheedId() == id){
+                return item.getSheedName();
+            }
+        }
+
+        throw new ParserException(String.format(ErrorCode.WRONG_SHEET_ID, id));
+    }
+
+    private class SheetDesc{
+
+        private int sheedId;
+        private String sheedRId;
+        private String sheedName;
+
+        public int getSheedId() {
+            return sheedId;
+        }
+
+        public void setSheedId(int sheedId) {
+            this.sheedId = sheedId;
+        }
+
+        public String getSheedRId() {
+            return sheedRId;
+        }
+
+        public void setSheedRId(String sheedRId) {
+            this.sheedRId = sheedRId;
+        }
+
+        public String getSheedName() {
+            return sheedName;
+        }
+
+        public void setSheedName(String sheedName) {
+            this.sheedName = sheedName;
+        }
+    }
+
+    private class WorkBookHandler extends DefaultHandler
+    {
+
+        private List<SheetDesc> sheets = new ArrayList<>();
+        private String content;
+        private SheetDesc sheetDesc;
+
+        public void startElement(String uri, String localName, String name, Attributes attributes) throws SAXException {
+
+            if(name.equals("sheet")){
+                sheetDesc = new SheetDesc();
+
+                sheetDesc.setSheedId(Integer.parseInt(attributes.getValue("sheetId")));
+                sheetDesc.setSheedName(attributes.getValue("name"));
+                sheetDesc.setSheedRId(attributes.getValue("r:id") );
+
+                sheets.add(sheetDesc);
+            }
+        }
+
+        public void endElement(String uri, String localName, String name) throws SAXException {
+
+        }
+
+        public void characters(char[] ch, int start, int length) throws SAXException {
+            content += new String(ch, start, length);
+        }
+
+        public List<SheetDesc> getSheets() {
+            return sheets;
+        }
+
+        public void setSheets(List<SheetDesc> sheets) {
+            this.sheets = sheets;
+        }
+    }
+
 
     private XMLReader getSaxSheetParser(SharedStringsTable sst) throws SAXException {
         XMLReader parser = XMLReaderFactory.createXMLReader("org.apache.xerces.parsers.SAXParser");

@@ -26,6 +26,7 @@ public class ErrorCode {
 
     public static final String FILE_TYPE_ERROR =  "This file content wrong data. Try checked extension its must be .xlsx";
     public static final String REQURED_ERROR =  "PARSE ERROR, required field is null: %s at row number: %s";
+    public static final String WRONG_SHEET_ID = "You define wrong sheet  is %s";
 
 
 }
