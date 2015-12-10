@@ -25,6 +25,7 @@ public  @interface Column {
     String columnIndex() default "";
     boolean required() default false;
     String defaultValue() default "";
+    String format() default "";
     Class converter() default StringConverter.class;
 
 

@@ -29,4 +29,10 @@ public class ErrorCode {
     public static final String WRONG_SHEET_ID = "You define wrong sheet  is %s";
 
 
+    /*
+    * Parse
+    * */
+
+    public static final String CAST_ERROR =  "Incorrect type converter: %s for filed: %s that contain data: %s";
+
 }

@@ -1,8 +1,11 @@
 package com.mdanylenko.excel.parcer.handler;
 
 import com.mdanylenko.excel.annotation.Column;
+import com.mdanylenko.excel.converter.DateConverter;
 import com.mdanylenko.excel.converter.TypeConverter;
+import com.mdanylenko.excel.exception.ErrorCode;
 import com.mdanylenko.excel.exception.ParserException;
+import com.mdanylenko.excel.exception.TypeCastException;
 import com.mdanylenko.excel.model.ColumnDescription;
 import com.mdanylenko.excel.model.SheetDescription;
 import org.apache.poi.xssf.model.SharedStringsTable;
@@ -121,7 +124,18 @@ public class SaxSheetHandler extends DefaultHandler {
                         ColumnDescription desc = entry.getValue();
 
                         if(isNull(field.get(row))){
-                            field.set(row, desc.getConverter().convert(desc.getDefaultValue()));
+                            try {
+                                TypeConverter converter = desc.getConverter();
+                                if( converter instanceof DateConverter){
+                                    DateConverter dateConverter = (DateConverter) converter;
+                                    Column column = field.getAnnotation(Column.class);
+                                    field.set(row, dateConverter.convert(desc.getDefaultValue(), column.format()));
+                                }else{
+                                    field.set(row, converter.convert(desc.getDefaultValue()));
+                                }
+                            } catch (TypeCastException e) {
+                                exceptionsHandler.add(new TypeCastException(String.format(ErrorCode.CAST_ERROR, desc.getConverter(), field, cellContent), e));
+                            }
                         }
                     }
 
@@ -157,7 +171,18 @@ public class SaxSheetHandler extends DefaultHandler {
                 if(nonNull(description)){
                     Field field = description.getField();
                     TypeConverter converter = description.getConverter();
-                    field.set(row, converter.convert(cellContent));
+                    try {
+                        if( converter instanceof DateConverter){
+                            DateConverter dateConverter = (DateConverter) converter;
+                            Column column = field.getAnnotation(Column.class);
+                            field.set(row, dateConverter.convert(cellContent, column.format()));
+                        }else{
+                            field.set(row, converter.convert(cellContent));
+                        }
+
+                    } catch (TypeCastException e) {
+                        exceptionsHandler.add(new TypeCastException(String.format(ErrorCode.CAST_ERROR, converter, field, cellContent ), e));
+                    }
                 }
 
 

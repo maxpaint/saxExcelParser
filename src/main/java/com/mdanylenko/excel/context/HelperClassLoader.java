@@ -33,13 +33,13 @@ public class HelperClassLoader {
     public Set<Class<?>> getTypesAnnotatedWith(final Class<? extends Annotation> annotation){
         Set<Class<?>> result = new HashSet<>();
 
-        OUTER: for (Class<?> clazz : classNames){
+         for (Class<?> clazz : classNames){
 
             Annotation[] res =  clazz.getAnnotations();
             for (Annotation ann : res){
                 if( ann.annotationType().equals(annotation)){
                     result.add(clazz);
-                    break OUTER;
+                    break ;
                 }
             }
         }
