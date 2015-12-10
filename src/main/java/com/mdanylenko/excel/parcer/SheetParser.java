@@ -2,6 +2,7 @@ package com.mdanylenko.excel.parcer;
 
 import com.mdanylenko.excel.exception.ConfigException;
 import com.mdanylenko.excel.exception.ParserException;
+import com.mdanylenko.excel.exception.PrepareContextException;
 
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
@@ -16,7 +17,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  */
 public interface SheetParser {
 
-    <T> BlockingQueue<T> selectSheet(Class<T> type, Integer fetchSize);
+    <T> BlockingQueue<T> selectSheet(Class<T> type, Integer fetchSize) throws PrepareContextException;
     void parseSheet() throws ParserException;
     List<Throwable> getExceptionsHandler();
     AtomicBoolean isProcessFinished();

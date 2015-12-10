@@ -1,4 +1,4 @@
-package com.mdanylenko.dto.example;
+package com.mdanylenko.dto;
 
 import com.mdanylenko.excel.annotation.Column;
 import com.mdanylenko.excel.annotation.Sheet;

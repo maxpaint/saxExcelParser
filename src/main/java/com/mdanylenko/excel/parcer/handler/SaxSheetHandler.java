@@ -15,10 +15,7 @@ import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
 import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.BlockingQueue;
 
 import static com.mdanylenko.excel.exception.ErrorCode.REQURED_ERROR;
@@ -41,7 +38,7 @@ public class SaxSheetHandler extends DefaultHandler {
     private List<Throwable> exceptionsHandler;
 
     private String columnName = "";
-    private ArrayList<Field> reguiredFields = new ArrayList<>();
+    private Set<Field> reguiredFields = new HashSet<>();
     private Map<Field, ColumnDescription> defaultFields = new HashMap<>();
     private int rowNumber;
     private boolean isEmpty = true;
@@ -154,8 +151,14 @@ public class SaxSheetHandler extends DefaultHandler {
 
             if(rowNumber == 1) {
                 ColumnDescription columnDescription = sheetDescription.getColumnMap().get(cellContent);
+                if(isNull(columnDescription)){
+                    return;
+                }
+
                 if(columnDescription.isRequired()){
-                    reguiredFields.add(columnDescription.getField());
+                    if( !reguiredFields.contains(columnDescription.getField()) ){
+                        reguiredFields.add(columnDescription.getField());
+                    }
                 }
 
                 if(nonNull(columnDescription.getDefaultValue())){

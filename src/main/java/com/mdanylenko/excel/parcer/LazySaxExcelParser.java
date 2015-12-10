@@ -1,10 +1,14 @@
 package com.mdanylenko.excel.parcer;
 
+import com.mdanylenko.excel.annotation.Column;
 import com.mdanylenko.excel.annotation.Sheet;
 import com.mdanylenko.excel.context.ExcelContext;
+import com.mdanylenko.excel.converter.TypeConverter;
 import com.mdanylenko.excel.exception.ConfigException;
 import com.mdanylenko.excel.exception.ErrorCode;
 import com.mdanylenko.excel.exception.ParserException;
+import com.mdanylenko.excel.exception.PrepareContextException;
+import com.mdanylenko.excel.model.ColumnDescription;
 import com.mdanylenko.excel.model.SheetDescription;
 import com.mdanylenko.excel.parcer.handler.SaxSheetHandler;
 import org.apache.poi.POIXMLDocument;
@@ -23,18 +27,18 @@ import org.xml.sax.helpers.XMLReaderFactory;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 import java.io.*;
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.stream.Collectors;
 
-import static com.mdanylenko.excel.exception.ErrorCode.FILE_TYPE_ERROR;
+import static com.mdanylenko.excel.exception.ErrorCode.*;
+import static com.mdanylenko.excel.exception.ErrorCode.CONTEXT_CLASS_MAPPING;
+import static com.mdanylenko.excel.exception.ErrorCode.CONTEXT_CLASS_MAPPING_ERROR;
 import static com.mdanylenko.excel.util.StringUtil.isEmpty;
 import static java.util.Objects.isNull;
-import static java.util.Objects.nonNull;
 
 /**
  * Created by IntelliJ IDEA.<br/>
@@ -76,27 +80,81 @@ public class LazySaxExcelParser implements SheetParser {
 
 
     @Override
-    public <T> BlockingQueue<T> selectSheet(Class<T> type, Integer fetchSize) {
+    public <T> BlockingQueue<T> selectSheet(Class<T> type, Integer fetchSize) throws PrepareContextException {
         BlockingQueue<T> blockingQueue = new ArrayBlockingQueue<>(fetchSize);
         this.blockingQueue = blockingQueue;
 
-        Sheet sheet = type.getAnnotation(Sheet.class);
+        /*Sheet sheet = type.getAnnotation(Sheet.class);*/
+        sheetDescription = new SheetDescription();
 
-        String name = sheet.sheetName();
-        if(!isEmpty(name)){
-            for (SheetDescription item : context.getSheets()){
-                if( item.getSheetName().equalsIgnoreCase(name) ){
-                    sheetDescription = item;
-                }
+        if( context.getClasses().contains(type) ){
+            sheetDescription.setType(type);
+
+            Sheet sheetDto = type.getDeclaredAnnotation(Sheet.class);
+
+            String sheetId = sheetDto.sheetId();
+            String sheetName = sheetDto.sheetName();
+
+            if(isEmpty(sheetId) && isEmpty( sheetName )){
+                throw new PrepareContextException(String.format(CONTEXT_SHEET_DEFINE, type));
             }
 
-        }else{
-            String id = sheet.sheetId();
+            if(!isEmpty(sheetId) && !isEmpty( sheetName )){
+                throw new PrepareContextException(String.format(CONTEXT_WRONG_SHEET_DEFINE, type));
+            }
 
-            for (SheetDescription item : context.getSheets()){
-                if( item.getSheetId().equalsIgnoreCase(id) ){
-                    sheetDescription = item;
+            if(!isEmpty(sheetId)){
+                sheetDescription.setSheetId(sheetId);
+            }
+
+            if(!isEmpty( sheetName )){
+                sheetDescription.setSheetName(sheetName);
+            }
+
+            sheetDescription.setHasHeader(sheetDto.hasHeader());
+
+            Field[] fields = type.getDeclaredFields();
+
+            for (Field field : fields) {
+                field.setAccessible(true);
+                Column annotation = field.getDeclaredAnnotation(Column.class);
+                String columnIndex = annotation.columnIndex();
+                String columnName = annotation.columnName();
+                boolean isRequired = annotation.required();
+                String defaultValue = annotation.defaultValue();
+                TypeConverter converter;
+
+                if(TypeConverter.class.isAssignableFrom(annotation.converter())) {
+                    try {
+                        converter = (TypeConverter) annotation.converter().newInstance();
+
+                    } catch (IllegalAccessException | InstantiationException e) {
+                        throw new PrepareContextException(e.getMessage(), e);
+                    }
+                } else {
+                    throw new PrepareContextException(String.format(CONTEXT_CONVERTER, field, type));
                 }
+
+                if(isEmpty(columnIndex) && isEmpty(columnName)){
+                    throw new PrepareContextException(String.format(CONTEXT_CLASS_MAPPING_ERROR, field, type));
+                }
+
+                if(!isEmpty(columnIndex) && !isEmpty(columnName)){
+                    throw new PrepareContextException(String.format(CONTEXT_CLASS_MAPPING, field, type));
+                }
+
+
+                ColumnDescription.Builder builder =  new ColumnDescription.Builder();
+                builder.setColumnIndex(columnIndex)
+                        .setColumnName(columnName)
+                        .setIsRequired(isRequired)
+                        .setDefaultValue(defaultValue)
+                        .setConverter((converter))
+                        .setField(field);
+
+
+                sheetDescription.addColumn(builder.build());
+
             }
         }
 
@@ -116,7 +174,6 @@ public class LazySaxExcelParser implements SheetParser {
             XMLReader parser = getSaxSheetParser(sst);
             InputSource sheetSource = new InputSource(sheet);
             parser.parse(sheetSource);
-            System.out.println("test");
         }catch (OpenXML4JException | SAXException | IOException e){
             throw  new ParserException(e.getMessage(), e);
         }
