@@ -6,7 +6,7 @@ import com.mdanylenko.excel.converter.IntegerConverter;
 
 /**
  * Created by IntelliJ IDEA.<br/>
- * User: mdanylenko<br/>
+ * User: Max Danylenko<br/>
  * Date: 08.12.2015<br/>
  * Time: 17:59<br/>
  * To change this template use File | Settings | File Templates.

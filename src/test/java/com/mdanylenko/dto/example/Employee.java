@@ -10,7 +10,7 @@ import java.sql.Date;
 
 /**
  * Created by IntelliJ IDEA.<br/>
- * User: mdanylenko<br/>
+ * User:  Max Danylenko<br/>
  * Date: 10.12.2015<br/>
  * Time: 14:27<br/>
  * To change this template use File | Settings | File Templates.
@@ -41,9 +41,8 @@ public class Employee {
             converter = SqlDateConverter.class, format = "dd.MM.yy")
     private Date hireDate;
 
-    @Column(columnName = "JOB_ID",
-            converter = IntegerConverter.class)
-    private Integer jobId;
+    @Column(columnName = "JOB_ID")
+    private String jobId;
 
     @Column(columnName = "SALARY",
             converter = IntegerConverter.class)
@@ -109,11 +108,11 @@ public class Employee {
         this.hireDate = hireDate;
     }
 
-    public Integer getJobId() {
+    public String getJobId() {
         return jobId;
     }
 
-    public void setJobId(Integer jobId) {
+    public void setJobId(String jobId) {
         this.jobId = jobId;
     }
 

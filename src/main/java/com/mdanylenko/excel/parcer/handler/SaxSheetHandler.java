@@ -1,7 +1,7 @@
 package com.mdanylenko.excel.parcer.handler;
 
 import com.mdanylenko.excel.annotation.Column;
-import com.mdanylenko.excel.converter.DateConverter;
+import com.mdanylenko.excel.converter.DateTypeConverter;
 import com.mdanylenko.excel.converter.TypeConverter;
 import com.mdanylenko.excel.exception.ErrorCode;
 import com.mdanylenko.excel.exception.ParserException;
@@ -126,8 +126,8 @@ public class SaxSheetHandler extends DefaultHandler {
                         if(isNull(field.get(row))){
                             try {
                                 TypeConverter converter = desc.getConverter();
-                                if( converter instanceof DateConverter){
-                                    DateConverter dateConverter = (DateConverter) converter;
+                                if( converter instanceof DateTypeConverter){
+                                    DateTypeConverter dateConverter = (DateTypeConverter) converter;
                                     Column column = field.getAnnotation(Column.class);
                                     field.set(row, dateConverter.convert(desc.getDefaultValue(), column.format()));
                                 }else{
@@ -172,8 +172,8 @@ public class SaxSheetHandler extends DefaultHandler {
                     Field field = description.getField();
                     TypeConverter converter = description.getConverter();
                     try {
-                        if( converter instanceof DateConverter){
-                            DateConverter dateConverter = (DateConverter) converter;
+                        if( converter instanceof DateTypeConverter){
+                            DateTypeConverter dateConverter = (DateTypeConverter) converter;
                             Column column = field.getAnnotation(Column.class);
                             field.set(row, dateConverter.convert(cellContent, column.format()));
                         }else{
