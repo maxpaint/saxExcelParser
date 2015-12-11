@@ -42,7 +42,6 @@ public class ColumnTest extends Assert {
 
         }catch (Throwable e){
             e.printStackTrace();
-            assertNull(e);
         }
     }
 
@@ -63,7 +62,6 @@ public class ColumnTest extends Assert {
 
         }catch (Throwable e){
             e.printStackTrace();
-            assertNull(e);
         }
     }
 
@@ -102,10 +100,9 @@ public class ColumnTest extends Assert {
                     }
                 }
             }
-            
+
         }catch (Throwable e){
             e.printStackTrace();
-            assertNull(e);
         }
     }
 

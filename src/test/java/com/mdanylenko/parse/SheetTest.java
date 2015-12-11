@@ -36,7 +36,7 @@ public class SheetTest extends Assert {
                 assertTrue(parser.getExceptionsHandler().size() == 0);
             }
         }catch (Throwable e){
-            assertNull(e);
+            e.printStackTrace();
         }
     }
 
@@ -55,7 +55,7 @@ public class SheetTest extends Assert {
                 assertTrue(parser.getExceptionsHandler().size() == 0);
             }
         }catch (Throwable e){
-            assertNull(e);
+            e.printStackTrace();
         }
     }
 }
