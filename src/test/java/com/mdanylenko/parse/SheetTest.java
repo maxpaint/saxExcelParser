@@ -3,10 +3,8 @@ package com.mdanylenko.parse;
 
 import com.mdanylenko.dto.Employee;
 import com.mdanylenko.dto.Job;
-import com.mdanylenko.excel.context.ExcelContext;
 import com.mdanylenko.excel.parcer.LazySaxExcelParser;
 import junit.framework.Assert;
-import junit.framework.TestCase;
 import org.junit.Test;
 
 import java.io.File;
@@ -30,8 +28,7 @@ public class SheetTest extends Assert {
             ClassLoader classLoader = getClass().getClassLoader();
             File file = new File(classLoader.getResource("example.xlsx").getFile());
 
-            ExcelContext context = ExcelContext.prepareContext("com.mdanylenko.dto");
-            LazySaxExcelParser parser = context.getParserSax(file);
+            LazySaxExcelParser parser = new LazySaxExcelParser(file);
             BlockingQueue<Employee> queue = parser.selectSheet(Employee.class, 10_000);
             parser.parseSheet();
 
@@ -48,8 +45,7 @@ public class SheetTest extends Assert {
             ClassLoader classLoader = getClass().getClassLoader();
             File file = new File(classLoader.getResource("example.xlsx").getFile());
 
-            ExcelContext context = ExcelContext.prepareContext("com.mdanylenko.dto");
-            LazySaxExcelParser parser = context.getParserSax(file);
+            LazySaxExcelParser parser = new LazySaxExcelParser(file);
             BlockingQueue<Job> queue = parser.selectSheet(Job.class, 10_000);
             parser.parseSheet();
 

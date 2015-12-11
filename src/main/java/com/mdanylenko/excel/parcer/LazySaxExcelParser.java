@@ -52,14 +52,12 @@ public class LazySaxExcelParser implements SheetParser {
     private List<Throwable> exceptionsHandler;
 
     private File file;
-    private ExcelContext context;
     private SheetDescription sheetDescription;
     private AtomicBoolean processFinished;
 
     private BlockingQueue blockingQueue;
 
-
-    public LazySaxExcelParser(File file, ExcelContext context) throws ConfigException {
+    public LazySaxExcelParser(File file) throws ConfigException {
         try (InputStream inputStream = new BufferedInputStream(new FileInputStream(file))) {
             if(! POIXMLDocument.hasOOXMLHeader(inputStream)){
                 throw new ConfigException(FILE_TYPE_ERROR);
@@ -69,13 +67,12 @@ public class LazySaxExcelParser implements SheetParser {
         }
 
         this.file = file;
-        this.context = context;
         this.processFinished = new AtomicBoolean(false);
         exceptionsHandler = new ArrayList<>();
     }
 
-    public LazySaxExcelParser(String path, ExcelContext context) throws ConfigException {
-        this(new File(path), context);
+    public LazySaxExcelParser(String path) throws ConfigException {
+        this(new File(path));
     }
 
 
@@ -87,7 +84,7 @@ public class LazySaxExcelParser implements SheetParser {
         /*Sheet sheet = type.getAnnotation(Sheet.class);*/
         sheetDescription = new SheetDescription();
 
-        if( context.getClasses().contains(type) ){
+
             sheetDescription.setType(type);
 
             Sheet sheetDto = type.getDeclaredAnnotation(Sheet.class);
@@ -156,8 +153,6 @@ public class LazySaxExcelParser implements SheetParser {
                 sheetDescription.addColumn(builder.build());
 
             }
-        }
-
         return blockingQueue;
 
     }

@@ -20,8 +20,6 @@ import static com.mdanylenko.excel.exception.ErrorCode.CONTEXT_CLASS_DEFINE;
  */
 public class ExcelContext {
 
-    /*private SheetDescription sheet;*/
-
     private  Set<Class<?>> classes;
 
     public static ExcelContext prepareContext(String contextPath) throws PrepareContextException {
@@ -38,21 +36,12 @@ public class ExcelContext {
         return context;
     }
 
-
-    /*public void setSheet(SheetDescription sheet) {
-        this.sheet = sheet;
-    }
-
-    public SheetDescription getSheet() {
-        return sheet;
-    }*/
-
     public LazySaxExcelParser getParserSax(String path) throws ConfigException {
-        return new LazySaxExcelParser(path, this);
+        return new LazySaxExcelParser(path);
     }
 
     public LazySaxExcelParser getParserSax(File file) throws ConfigException {
-        return new LazySaxExcelParser(file, this);
+        return new LazySaxExcelParser(file);
     }
 
     public Set<Class<?>> getClasses() {

@@ -3,7 +3,6 @@ package com.mdanylenko.parse;
 import com.mdanylenko.dto.JobRequiredDefault;
 import com.mdanylenko.dto.JobRequiredNegative;
 import com.mdanylenko.dto.JobRequiredPositive;
-import com.mdanylenko.excel.context.ExcelContext;
 import com.mdanylenko.excel.parcer.LazySaxExcelParser;
 import junit.framework.Assert;
 import org.junit.Test;
@@ -33,8 +32,7 @@ public class ColumnTest extends Assert {
             ClassLoader classLoader = getClass().getClassLoader();
             File file = new File(classLoader.getResource("required.xlsx").getFile());
 
-            ExcelContext context = ExcelContext.prepareContext("com.mdanylenko.dto");
-            LazySaxExcelParser parser = context.getParserSax(file);
+            LazySaxExcelParser parser =new LazySaxExcelParser(file);
             BlockingQueue<JobRequiredPositive> queue = parser.selectSheet(JobRequiredPositive.class, 10_000);
             parser.parseSheet();
 
@@ -52,8 +50,7 @@ public class ColumnTest extends Assert {
             ClassLoader classLoader = getClass().getClassLoader();
             File file = new File(classLoader.getResource("required.xlsx").getFile());
 
-            ExcelContext context = ExcelContext.prepareContext("com.mdanylenko.dto");
-            LazySaxExcelParser parser = context.getParserSax(file);
+            LazySaxExcelParser parser = new LazySaxExcelParser(file);
             BlockingQueue<JobRequiredNegative> queue = parser.selectSheet(JobRequiredNegative.class, 10_000);
             parser.parseSheet();
 
@@ -71,8 +68,8 @@ public class ColumnTest extends Assert {
             ClassLoader classLoader = getClass().getClassLoader();
             File file = new File(classLoader.getResource("required.xlsx").getFile());
 
-            ExcelContext context = ExcelContext.prepareContext("com.mdanylenko.dto");
-            LazySaxExcelParser parser = context.getParserSax(file);
+
+            LazySaxExcelParser parser = new LazySaxExcelParser(file);
             BlockingQueue<JobRequiredDefault> queue = parser.selectSheet(JobRequiredDefault.class, 10_000);
             parser.parseSheet();
 

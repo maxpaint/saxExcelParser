@@ -5,6 +5,7 @@ import com.mdanylenko.excel.example.dto.DataRemediationDto;
 import com.mdanylenko.excel.exception.ConfigException;
 import com.mdanylenko.excel.exception.PrepareContextException;
 import com.mdanylenko.excel.exception.ParserException;
+import com.mdanylenko.excel.parcer.LazySaxExcelParser;
 import com.mdanylenko.excel.parcer.SheetParser;
 
 import java.util.concurrent.BlockingQueue;
@@ -15,9 +16,7 @@ public class App
 {
 
     public static void main( String[] args ) throws PrepareContextException, ParserException, ConfigException, ClassNotFoundException {
-        ExcelContext context = ExcelContext.prepareContext("com.mdanylenko.excel.example.dto");
-        SheetParser parser = context.getParserSax("C:\\Users\\maxpaint\\Downloads\\testAnnotations.xlsx");//Main_Data_25-Nov-15_13-11-27 (1) //testAnnotations //
-
+        SheetParser parser = new LazySaxExcelParser("C:\\Users\\maxpaint\\Downloads\\testAnnotations.xlsx");
         BlockingQueue<DataRemediationDto> futureResult = parser.selectSheet(DataRemediationDto.class, 100_000);
 
         long startTime = System.nanoTime();
