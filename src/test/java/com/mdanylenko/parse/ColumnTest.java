@@ -36,7 +36,10 @@ public class ColumnTest extends Assert {
             BlockingQueue<JobRequiredPositive> queue = parser.selectSheet(JobRequiredPositive.class, 10_000);
             parser.parseSheet();
 
-            assertTrue(parser.getExceptionsHandler().size() == 0);
+            while( parser.isProcessFinished().get() ){
+                assertTrue(parser.getExceptionsHandler().size() == 0);
+            }
+
         }catch (Throwable e){
             e.printStackTrace();
             assertNull(e);
@@ -54,7 +57,10 @@ public class ColumnTest extends Assert {
             BlockingQueue<JobRequiredNegative> queue = parser.selectSheet(JobRequiredNegative.class, 10_000);
             parser.parseSheet();
 
-            assertTrue(parser.getExceptionsHandler().size() == 3);
+            while( parser.isProcessFinished().get() ){
+                assertTrue(parser.getExceptionsHandler().size() == 3);
+            }
+
         }catch (Throwable e){
             e.printStackTrace();
             assertNull(e);
@@ -73,28 +79,30 @@ public class ColumnTest extends Assert {
             BlockingQueue<JobRequiredDefault> queue = parser.selectSheet(JobRequiredDefault.class, 10_000);
             parser.parseSheet();
 
-            List<JobRequiredDefault> result = new ArrayList<>();
-            queue.drainTo(result);
+            while( parser.isProcessFinished().get() ){
+                List<JobRequiredDefault> result = new ArrayList<>();
+                queue.drainTo(result);
 
-            for (JobRequiredDefault item: result){
-                if( item.getJobId().equalsIgnoreCase("JOB_ID") ){
-                    SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yy", Locale.ENGLISH);
-                    assertTrue( item.getJobTitle().equals("JOB_TITLE") );
-                    assertTrue( item.getMinSalary().equals(1) );
-                    assertTrue( item.getEndDate().equals(new Date( dateFormat.parse("11.12.15").getTime() )) );
-                    assertTrue( item.getStartDate().equals( dateFormat.parse("11.12.15") ) );
-                }
+                for (JobRequiredDefault item: result){
+                    if( item.getJobId().equalsIgnoreCase("JOB_ID") ){
+                        SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yy", Locale.ENGLISH);
+                        assertTrue( item.getJobTitle().equals("JOB_TITLE") );
+                        assertTrue( item.getMinSalary().equals(1) );
+                        assertTrue( item.getEndDate().equals(new Date( dateFormat.parse("11.12.15").getTime() )) );
+                        assertTrue( item.getStartDate().equals( dateFormat.parse("11.12.15") ) );
+                    }
 
-                if(item.getJobId().equalsIgnoreCase("HR_REP")){
-                    SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yy", Locale.ENGLISH);
-                    assertTrue( item.getJobTitle().equals("JOB_TITLE") );
-                    assertTrue( item.getMinSalary().equals(1) );
-                    assertTrue( item.getMaxSalary().equals(2) );
-                    assertTrue( item.getEndDate().equals(new Date( dateFormat.parse("11.12.15").getTime() )) );
-                    assertTrue( item.getStartDate().equals( dateFormat.parse("11.12.15") ) );
+                    if(item.getJobId().equalsIgnoreCase("HR_REP")){
+                        SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yy", Locale.ENGLISH);
+                        assertTrue( item.getJobTitle().equals("JOB_TITLE") );
+                        assertTrue( item.getMinSalary().equals(1) );
+                        assertTrue( item.getMaxSalary().equals(2) );
+                        assertTrue( item.getEndDate().equals(new Date( dateFormat.parse("11.12.15").getTime() )) );
+                        assertTrue( item.getStartDate().equals( dateFormat.parse("11.12.15") ) );
+                    }
                 }
             }
-
+            
         }catch (Throwable e){
             e.printStackTrace();
             assertNull(e);

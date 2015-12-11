@@ -32,7 +32,9 @@ public class SheetTest extends Assert {
             BlockingQueue<Employee> queue = parser.selectSheet(Employee.class, 10_000);
             parser.parseSheet();
 
-            assertTrue(parser.getExceptionsHandler().size() == 0);
+            while( parser.isProcessFinished().get() ) {
+                assertTrue(parser.getExceptionsHandler().size() == 0);
+            }
         }catch (Throwable e){
             assertNull(e);
         }
@@ -49,7 +51,9 @@ public class SheetTest extends Assert {
             BlockingQueue<Job> queue = parser.selectSheet(Job.class, 10_000);
             parser.parseSheet();
 
-            assertTrue(parser.getExceptionsHandler().size() == 0);
+            while( parser.isProcessFinished().get() ) {
+                assertTrue(parser.getExceptionsHandler().size() == 0);
+            }
         }catch (Throwable e){
             assertNull(e);
         }

@@ -18,7 +18,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public interface SheetParser {
 
     <T> BlockingQueue<T> selectSheet(Class<T> type, Integer fetchSize) throws PrepareContextException;
-    void parseSheet() throws ParserException;
+    void parseSheet();
     List<Throwable> getExceptionsHandler();
     AtomicBoolean isProcessFinished();
 }
