@@ -12,6 +12,7 @@ public class ErrorCode {
     /*
     * CONTEXT
     * */
+    public static final String CONTEXT_CLASS_ARRAY_TYPE = "Can't find array class type";
     public static final String CONTEXT_CLASS_PATH = "Can't find class by this path %s";
     public static final String CONTEXT_CLASS_DEFINE = "Can't find annotation class by this path %s";
     public static final String CONTEXT_SHEET_DEFINE = "For class: %s you must define sheetName or sheetId";

@@ -48,15 +48,9 @@ public class ContextTest  extends Assert {
     }
 
     @Test
-    public void positiveAnnotation(){
-        String error = "";
-        try {
+    public void positiveAnnotation() throws PrepareContextException {
             ExcelContext context = ExcelContext.prepareContext("com.mdanylenko.dto");
-        } catch (PrepareContextException e) {
-            error = e.getMessage();
-        }
 
-        assertEquals("", error);
     }
 
 }

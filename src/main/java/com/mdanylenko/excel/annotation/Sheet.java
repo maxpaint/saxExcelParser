@@ -18,5 +18,5 @@ public @interface Sheet {
 
     String sheetName() default "";
     String sheetId() default "";
-    boolean hasHeader();
+    boolean hasHeader() default false;
 }

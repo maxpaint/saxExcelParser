@@ -10,7 +10,9 @@ import com.mdanylenko.excel.exception.PrepareContextException;
 import com.mdanylenko.excel.model.ColumnDescription;
 import com.mdanylenko.excel.model.SheetDesc;
 import com.mdanylenko.excel.model.SheetDescription;
+import com.mdanylenko.excel.parcer.handler.ArraySaxHandler;
 import com.mdanylenko.excel.parcer.handler.SaxSheetHandler;
+import com.mdanylenko.excel.parcer.handler.SaxWithHeaderSheetHandler;
 import com.mdanylenko.excel.parcer.handler.WorkBookHandler;
 import org.apache.poi.POIXMLDocument;
 import org.apache.poi.openxml4j.exceptions.OpenXML4JException;
@@ -36,10 +38,10 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import static com.mdanylenko.excel.exception.ErrorCode.*;
 import static com.mdanylenko.excel.util.StringUtil.isEmpty;
 import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
 
 /**
- * Created by IntelliJ IDEA.<br/>
- * User: Max Danylenko<br/>
+ * Created by IntelliJ IDEA.<br/> * User: Max Danylenko<br/>
  * Date: 26.11.2015<br/>
  * Time: 16:07<br/>
  * To change this template use File | Settings | File Templates.
@@ -74,7 +76,46 @@ public class LazySaxExcelParser implements SheetParser {
 
 
     @Override
+    public <T> BlockingQueue<T> selectSheet(Class<T> type, String sheet, boolean isHeader, Integer fetchSize) throws PrepareContextException {
+        BlockingQueue<T> blockingQueue = new ArrayBlockingQueue<>(fetchSize);
+        this.blockingQueue = blockingQueue;
+
+
+        if(type.isArray()){
+            if( type.getName().contains("String") || type.getName().contains("Object") ){
+                this.sheetDescription = new SheetDescription();
+                this.sheetDescription.setHeader(isHeader);
+                this.sheetDescription.setType(type);
+
+                Integer id = null;
+                String sheetName = null;
+                try {
+                    id = Integer.parseInt( sheet );
+                }catch (NumberFormatException ex){
+                    sheetName = sheet;
+                }
+
+                if( nonNull(id) ){
+                    this.sheetDescription.setSheetId(id.toString());
+                }
+
+                if( nonNull(sheetName) ){
+                    this.sheetDescription.setSheetName(sheetName);
+                }
+
+            }else{
+                throw new PrepareContextException(CONTEXT_CLASS_ARRAY_TYPE);
+            }
+        }
+
+        return blockingQueue;
+    }
+
+
+    @Override
     public <T> BlockingQueue<T> selectSheet(Class<T> type, Integer fetchSize) throws PrepareContextException {
+        selectSheet();
+
         BlockingQueue<T> blockingQueue = new ArrayBlockingQueue<>(fetchSize);
         this.blockingQueue = blockingQueue;
 
@@ -104,7 +145,7 @@ public class LazySaxExcelParser implements SheetParser {
             sheetDescription.setSheetName(sheetName);
         }
 
-        sheetDescription.setHasHeader(sheetDto.hasHeader());
+        sheetDescription.setHeader(sheetDto.hasHeader());
 
         Field[] fields = type.getDeclaredFields();
 
@@ -152,6 +193,10 @@ public class LazySaxExcelParser implements SheetParser {
         return blockingQueue;
     }
 
+    private void selectSheet(){
+
+    }
+
     @Override
     public void parseSheet()  {
         processFinished.set(false);
@@ -162,21 +207,40 @@ public class LazySaxExcelParser implements SheetParser {
                 try {
 
                     final  String name = sheetDescription.getSheetName();
-                    InputStream sheet = isEmpty(name) ? getSheetById(Integer.parseInt(sheetDescription.getSheetId())) : getSheetByName(name);
+
+                    Integer id = null;
+                    try{
+                        id  = Integer.parseInt(sheetDescription.getSheetId());
+                    }catch (NumberFormatException e){
+                        System.out.println(e.getMessage());
+                    }
+
+                    InputStream sheet = isEmpty(name) ? getSheetById(id) : getSheetByName(name);
                     OPCPackage pkg = OPCPackage.open(file);
                     XSSFReader r = new XSSFReader(pkg);
                     SharedStringsTable sst = r.getSharedStringsTable();
-                    XMLReader parser = getSaxSheetParser(sst);
-                    InputSource sheetSource = new InputSource(sheet);
 
+                    XMLReader parser = null;
+                    if(sheetDescription.getType().isArray()){
+
+                        parser = getArraySaxParser(sst);
+
+                    }else{
+                        parser = sheetDescription.hasHeader() ? getSaxWithHeaderSheetParser(sst) : getSaxSheetParser(sst);
+                    }
+
+
+                    InputSource sheetSource = new InputSource(sheet);
                     parser.parse(sheetSource);
+
+
                 } catch (Throwable e) {
                     exceptionsHandler.add(new ParserException(e.getMessage(), e));
                 }
 
                 processFinished.set(true);
             }
-        });
+        }).start();
     }
 
     @Override
@@ -253,6 +317,19 @@ public class LazySaxExcelParser implements SheetParser {
     }
 
 
+    private XMLReader getSaxWithHeaderSheetParser(SharedStringsTable sst) throws SAXException {
+        XMLReader parser = XMLReaderFactory.createXMLReader("org.apache.xerces.parsers.SAXParser");
+
+        SaxWithHeaderSheetHandler handler = new SaxWithHeaderSheetHandler(sst);
+
+        handler.setBlockingQueue(blockingQueue);
+        handler.setSheetDescription(sheetDescription);
+        handler.setExceptionsHandler(exceptionsHandler);
+
+        parser.setContentHandler(handler);
+        return parser;
+    }
+
     private XMLReader getSaxSheetParser(SharedStringsTable sst) throws SAXException {
         XMLReader parser = XMLReaderFactory.createXMLReader("org.apache.xerces.parsers.SAXParser");
 
@@ -265,4 +342,20 @@ public class LazySaxExcelParser implements SheetParser {
         parser.setContentHandler(handler);
         return parser;
     }
+
+    private XMLReader getArraySaxParser(SharedStringsTable sst) throws SAXException {
+        XMLReader parser = XMLReaderFactory.createXMLReader("org.apache.xerces.parsers.SAXParser");
+
+        ArraySaxHandler handler = new ArraySaxHandler(sst);
+
+        handler.setBlockingQueue(blockingQueue);
+        handler.setSheetDescription(sheetDescription);
+        handler.setExceptionsHandler(exceptionsHandler);
+
+        parser.setContentHandler(handler);
+        return parser;
+    }
+
+
 }
+

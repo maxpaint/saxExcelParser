@@ -17,7 +17,7 @@ public class SheetDescription {
 
     private String sheetId;
 
-    private Boolean hasHeader;
+    private Boolean header;
 
     private Map<String, ColumnDescription> columnMap;
 
@@ -39,12 +39,12 @@ public class SheetDescription {
         this.sheetId = sheetId;
     }
 
-    public Boolean getHasHeader() {
-        return hasHeader;
+    public Boolean hasHeader() {
+        return header;
     }
 
-    public void setHasHeader(Boolean hasHeader) {
-        this.hasHeader = hasHeader;
+    public void setHeader(Boolean header) {
+        this.header = header;
     }
 
     public Class<?> getType() {
