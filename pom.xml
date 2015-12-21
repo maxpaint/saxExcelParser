@@ -33,18 +33,6 @@
             <version>2.11.0</version>
         </dependency>
 
-        <!--<dependency>
-            <groupId>com.geeoz.atom</groupId>
-            <artifactId>atom</artifactId>
-            <version>1.0.0</version>
-        </dependency>-->
-
-        <!--<dependency>
-            <groupId>org.apache.marmotta</groupId>
-            <artifactId>marmotta-rio-rss</artifactId>
-            <version>3.3.0</version>
-        </dependency>-->
-
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>

@@ -229,7 +229,6 @@ public class LazySaxExcelParser implements SheetParser {
                         parser = sheetDescription.hasHeader() ? getSaxWithHeaderSheetParser(sst) : getSaxSheetParser(sst);
                     }
 
-
                     InputSource sheetSource = new InputSource(sheet);
                     parser.parse(sheetSource);
 

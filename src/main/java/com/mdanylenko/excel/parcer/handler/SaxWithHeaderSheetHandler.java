@@ -8,6 +8,8 @@ import com.mdanylenko.excel.exception.ParserException;
 import com.mdanylenko.excel.exception.TypeCastException;
 import com.mdanylenko.excel.model.ColumnDescription;
 import com.mdanylenko.excel.model.SheetDescription;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.xssf.model.SharedStringsTable;
 import org.apache.poi.xssf.usermodel.XSSFRichTextString;
 import org.xml.sax.Attributes;
@@ -33,7 +35,7 @@ import static java.util.Objects.nonNull;
 /**
  * See org.xml.sax.helpers.DefaultHandler javadocs
  */
-public class SaxWithHeaderSheetHandler extends DefaultHandler {
+public class SaxWithHeaderSheetHandler extends BaseHandler {
 
     private List<Throwable> exceptionsHandler;
 
@@ -46,7 +48,7 @@ public class SaxWithHeaderSheetHandler extends DefaultHandler {
     private Object row;
 
     private SharedStringsTable sst;
-    private String cellContent;
+    private StringBuffer cellContent = new StringBuffer();
     private boolean nextIsValue;
 
     private BlockingQueue blockingQueue;
@@ -59,15 +61,6 @@ public class SaxWithHeaderSheetHandler extends DefaultHandler {
     }
 
     public void startElement(String uri, String localName, String name, Attributes attributes) throws SAXException {
-
-       /* if(name.equals("dimension")){
-            String dimensionString = attributes.getValue("ref").split("\\:")[1];
-            int dimension = Integer.parseInt(dimensionString.replaceAll("[A-Za-z]", ""));
-            if(dimension == 65536){
-                System.out.println("WARNING in excel dimension is 65536, but you can have more values");
-            }
-        }*/
-
         if(name.equals("row")){
             String rowStringNumber = attributes.getValue("r");
             rowNumber = Integer.parseInt(rowStringNumber);
@@ -79,7 +72,12 @@ public class SaxWithHeaderSheetHandler extends DefaultHandler {
                    exceptionsHandler.add(e);
                 }
             }
+        }
 
+        if ("inlineStr".equals(name) || "v".equals(name)) {
+            nextIsValue = true;
+            // Clear contents cache
+            cellContent.setLength(0);
         }
 
         // c => cell
@@ -87,24 +85,14 @@ public class SaxWithHeaderSheetHandler extends DefaultHandler {
             // Print the cell reference
             String cellNumber = attributes.getValue("r");
             columnName = cellNumber.replaceAll("\\d", "");
-            // Figure out if the value is an index in the SST
-            String cellType = attributes.getValue("t");
 
-            nextIsValue = nonNull(cellType) && cellType.equals("s") ;//|| cellType.equals("n")
+            setType(attributes);
         }
         // Clear contents cache
-        cellContent = "";
+        cellContent.setLength(0);
     }
 
     public void endElement(String uri, String localName, String name) throws SAXException {
-        // Process the last contents as required.
-        // Do now, as characters() may be called more than once
-        if(nextIsValue) {
-            int idx = Integer.parseInt(cellContent);
-            cellContent = new XSSFRichTextString(sst.getEntryAt(idx)).toString();
-            nextIsValue = false;
-        }
-
         if(name.equals("row")){
             if(rowNumber != 1 && !isEmpty){
                 try {
@@ -145,12 +133,13 @@ public class SaxWithHeaderSheetHandler extends DefaultHandler {
 
         // v => contents of a cell
         // Output after we've seen the string contents
-        if(name.equals("v") ) {//&& !StringUtil.isEmpty(cellContent)
+        if(name.equals("v") || name.equals("t")) {//&& !StringUtil.isEmpty(cellContent)
             isEmpty = false;
-            // start new row,  starts at column position A
+
+            String value = getTypeData(cellContent.toString(), sst);
 
             if(rowNumber == 1) {
-                ColumnDescription columnDescription = sheetDescription.getColumnMap().get(cellContent);
+                ColumnDescription columnDescription = sheetDescription.getColumnMap().get(value);
                 if(isNull(columnDescription)){
                     return;
                 }
@@ -178,13 +167,13 @@ public class SaxWithHeaderSheetHandler extends DefaultHandler {
                         if( converter instanceof DateTypeConverter){
                             DateTypeConverter dateConverter = (DateTypeConverter) converter;
                             Column column = field.getAnnotation(Column.class);
-                            field.set(row, dateConverter.convert(cellContent, column.format()));
+                            field.set(row, dateConverter.convert(value, column.format()));
                         }else{
-                            field.set(row, converter.convert(cellContent));
+                            field.set(row, converter.convert(value));
                         }
 
                     } catch (TypeCastException e) {
-                        exceptionsHandler.add(new TypeCastException(String.format(ErrorCode.CAST_ERROR, converter, field, cellContent ), e));
+                        exceptionsHandler.add(new TypeCastException(String.format(ErrorCode.CAST_ERROR, converter, field, value ), e));
                     }
                 }
 
@@ -196,7 +185,8 @@ public class SaxWithHeaderSheetHandler extends DefaultHandler {
     }
 
     public void characters(char[] ch, int start, int length) throws SAXException {
-        cellContent += new String(ch, start, length);
+        if (nextIsValue)
+            cellContent.append( ch, start, length );
     }
 
     public void setBlockingQueue(BlockingQueue blockingQueue) {
