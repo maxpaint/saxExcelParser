@@ -51,10 +51,12 @@ private SheetDescription sheetDescription;
         public SaxSheetHandler(SharedStringsTable sst) {
             this.sst = sst;
             this.columnMap = new HashMap<>();
-
         }
 
         public void startElement(String uri, String localName, String name, Attributes attributes) throws SAXException {
+            if(this.columnMap.isEmpty()){
+                this.columnMap = sheetDescription.getColumnMap();
+            }
 
             if(name.equals("row")){
                 String rowStringNumber = attributes.getValue("r");

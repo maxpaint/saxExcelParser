@@ -47,7 +47,7 @@ public class TypeOfParser extends BaseTest {
 
     }
 
-    /*@Test*/
+    @Test
     public void withoutHeaderSheetName() throws ConfigException, PrepareContextException {
         ClassLoader classLoader = getClass().getClassLoader();
         File file = new File(classLoader.getResource("withoutHeader.xlsx").getFile());
@@ -71,7 +71,7 @@ public class TypeOfParser extends BaseTest {
 
     }
 
-    /*@Test*/
+    @Test
     public void withoutHeaderArray() throws ConfigException, PrepareContextException {
         ClassLoader classLoader = getClass().getClassLoader();
         File file = new File(classLoader.getResource("withoutHeader.xlsx").getFile());
