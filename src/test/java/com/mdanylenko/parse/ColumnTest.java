@@ -4,7 +4,7 @@ import com.mdanylenko.dto.JobRequiredDefault;
 import com.mdanylenko.dto.JobRequiredNegative;
 import com.mdanylenko.dto.JobRequiredPositive;
 import com.mdanylenko.excel.parcer.LazySaxExcelParser;
-import junit.framework.Assert;
+import org.junit.Assert;
 import org.junit.Test;
 
 import java.io.File;

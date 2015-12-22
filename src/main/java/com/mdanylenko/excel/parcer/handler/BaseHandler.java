@@ -6,6 +6,9 @@ import org.apache.poi.xssf.usermodel.XSSFRichTextString;
 import org.xml.sax.Attributes;
 import org.xml.sax.helpers.DefaultHandler;
 
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+
 /**
  * Created by IntelliJ IDEA.<br/>
  * User: Max Danylenko<br/>
@@ -84,7 +87,24 @@ public class BaseHandler extends DefaultHandler {
         }
 
         return cellContent;
+    }
 
+    public Boolean isInner(Class<?>  clazz){
+        return clazz.toString().contains("$");
+    }
+
+    public Object createInnerInstance(Class<?> inner) throws IllegalAccessException, InvocationTargetException, InstantiationException, NoSuchMethodException, ClassNotFoundException {
+        String baseName = inner.toString().replace("class ", "");
+        baseName = baseName.substring(0, baseName.indexOf("$"));
+
+        Class<?> enclosingClass = Class.forName(baseName);
+        Object enclosingInstance = enclosingClass.newInstance();
+
+        Constructor<?> ctor = inner.getDeclaredConstructor(enclosingClass);
+
+        Object innerInstance = ctor.newInstance(enclosingInstance);
+
+        return innerInstance;
 
     }
 }

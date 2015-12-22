@@ -1,6 +1,7 @@
 package com.mdanylenko;
 
-import junit.framework.Assert;
+
+import org.junit.Assert;
 
 import java.util.concurrent.TimeUnit;
 

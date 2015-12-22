@@ -152,6 +152,10 @@ public class LazySaxExcelParser implements SheetParser {
         for (Field field : fields) {
             field.setAccessible(true);
             Column annotation = field.getDeclaredAnnotation(Column.class);
+            if( isNull(annotation) ){
+                continue;
+            }
+
             String columnIndex = annotation.columnIndex();
             String columnName = annotation.columnName();
             boolean isRequired = annotation.required();

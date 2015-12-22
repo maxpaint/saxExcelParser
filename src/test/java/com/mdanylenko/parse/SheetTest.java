@@ -4,7 +4,7 @@ package com.mdanylenko.parse;
 import com.mdanylenko.dto.Employee;
 import com.mdanylenko.dto.Job;
 import com.mdanylenko.excel.parcer.LazySaxExcelParser;
-import junit.framework.Assert;
+import org.junit.Assert;
 import org.junit.Test;
 
 import java.io.File;

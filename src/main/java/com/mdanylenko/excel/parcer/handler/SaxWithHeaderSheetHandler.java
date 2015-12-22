@@ -17,6 +17,7 @@ import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 import java.util.concurrent.BlockingQueue;
 
@@ -67,9 +68,15 @@ public class SaxWithHeaderSheetHandler extends BaseHandler {
             isEmpty = true;
             if(rowNumber != 1){
                 try {
-                    row = sheetDescription.getType().newInstance();
-                } catch (IllegalAccessException | InstantiationException e) {
+                    if( isInner( sheetDescription.getType() ) ){
+                        row = createInnerInstance(sheetDescription.getType());
+                    }else{
+                        row = sheetDescription.getType().newInstance();
+                    }
+
+                } catch (InvocationTargetException | NoSuchMethodException | ClassNotFoundException | IllegalAccessException | InstantiationException e) {
                    exceptionsHandler.add(e);
+                    e.printStackTrace();
                 }
             }
         }
