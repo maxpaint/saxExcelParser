@@ -10,13 +10,6 @@ import java.lang.reflect.Field;
 import java.util.*;
 import java.util.concurrent.BlockingQueue;
 
-/**
- * Created by IntelliJ IDEA.<br/>
- * User: Max Danylenko<br/>
- * Date: 19.12.2015<br/>
- * Time: 16:35<br/>
- * To change this template use File | Settings | File Templates.
- */
 public class ArraySaxHandler  extends BaseHandler {
 
     private List<Throwable> exceptionsHandler;

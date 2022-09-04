@@ -15,14 +15,10 @@ import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.BlockingQueue;
 
-/**
- * Created by IntelliJ IDEA.<br/>
- * User: Max Danylenko<br/>
- * Date: 10.12.2015<br/>
- * Time: 21:59<br/>
- * To change this template use File | Settings | File Templates.
- */
-public class ColumnTest extends Assert {
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
+public class ColumnTest {
 
 
     @Test
@@ -37,7 +33,7 @@ public class ColumnTest extends Assert {
             parser.parseSheet();
 
             while( parser.isProcessFinished().get() ){
-                assertTrue(parser.getExceptionsHandler().size() == 0);
+                assertEquals(0, parser.getExceptionsHandler().size());
             }
 
         }catch (Throwable e){
@@ -57,7 +53,7 @@ public class ColumnTest extends Assert {
             parser.parseSheet();
 
             while( parser.isProcessFinished().get() ){
-                assertTrue(parser.getExceptionsHandler().size() == 3);
+                assertEquals(3, parser.getExceptionsHandler().size());
             }
 
         }catch (Throwable e){
@@ -84,19 +80,19 @@ public class ColumnTest extends Assert {
                 for (JobRequiredDefault item: result){
                     if( item.getJobId().equalsIgnoreCase("JOB_ID") ){
                         SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yy", Locale.ENGLISH);
-                        assertTrue( item.getJobTitle().equals("JOB_TITLE") );
-                        assertTrue( item.getMinSalary().equals(1) );
-                        assertTrue( item.getEndDate().equals(new Date( dateFormat.parse("11.12.15").getTime() )) );
-                        assertTrue( item.getStartDate().equals( dateFormat.parse("11.12.15") ) );
+                        assertEquals("JOB_TITLE", item.getJobTitle());
+                        assertEquals(1, (int) item.getMinSalary());
+                        assertEquals(item.getEndDate(), new Date(dateFormat.parse("11.12.15").getTime()));
+                        assertEquals(item.getStartDate(), dateFormat.parse("11.12.15"));
                     }
 
                     if(item.getJobId().equalsIgnoreCase("HR_REP")){
                         SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yy", Locale.ENGLISH);
-                        assertTrue( item.getJobTitle().equals("JOB_TITLE") );
-                        assertTrue( item.getMinSalary().equals(1) );
-                        assertTrue( item.getMaxSalary().equals(2) );
-                        assertTrue( item.getEndDate().equals(new Date( dateFormat.parse("11.12.15").getTime() )) );
-                        assertTrue( item.getStartDate().equals( dateFormat.parse("11.12.15") ) );
+                        assertEquals("JOB_TITLE", item.getJobTitle());
+                        assertEquals(1, (int) item.getMinSalary());
+                        assertEquals(2, (int) item.getMaxSalary());
+                        assertEquals(item.getEndDate(), new Date(dateFormat.parse("11.12.15").getTime()));
+                        assertEquals(item.getStartDate(), dateFormat.parse("11.12.15"));
                     }
                 }
             }

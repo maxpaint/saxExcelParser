@@ -4,13 +4,6 @@ import com.mdanylenko.excel.exception.TypeCastException;
 
 import static com.mdanylenko.excel.util.StringUtil.isEmpty;
 
-/**
- * Created by IntelliJ IDEA.<br/>
- * User: Max Danylenko<br/>
- * Date: 23.12.2015<br/>
- * Time: 0:15<br/>
- * To change this template use File | Settings | File Templates.
- */
 public class DoubleConverter implements TypeConverter<Double> {
 
     @Override

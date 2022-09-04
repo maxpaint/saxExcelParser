@@ -9,13 +9,6 @@ import java.util.Locale;
 
 import static com.mdanylenko.excel.util.StringUtil.isEmpty;
 
-/**
- * Created by IntelliJ IDEA.<br/>
- * User:  Max Danylenko<br/>
- * Date: 10.12.2015<br/>
- * Time: 16:05<br/>
- * To change this template use File | Settings | File Templates.
- */
 public class SqlDateConverter implements DateTypeConverter<Date> {
 
     private SimpleDateFormat defaultFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH);

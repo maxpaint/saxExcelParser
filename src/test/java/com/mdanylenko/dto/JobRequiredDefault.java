@@ -8,13 +8,6 @@ import com.mdanylenko.excel.converter.SqlDateConverter;
 
 import java.sql.Date;
 
-/**
- * Created by IntelliJ IDEA.<br/>
- * User: Max Danylenko<br/>
- * Date: 11.12.2015<br/>
- * Time: 0:17<br/>
- * To change this template use File | Settings | File Templates.
- */
 @Sheet(
         sheetId = "3",
         hasHeader = true

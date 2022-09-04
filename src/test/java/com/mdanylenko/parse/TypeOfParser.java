@@ -13,13 +13,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
 
-/**
- * Created by IntelliJ IDEA.<br/>
- * User: Max Danylenko<br/>
- * Date: 19.12.2015<br/>
- * Time: 13:50<br/>
- * To change this template use File | Settings | File Templates.
- */
 public class TypeOfParser extends BaseTest {
 
     @Test
@@ -87,7 +80,7 @@ public class TypeOfParser extends BaseTest {
 
         executiveTime("withoutHeaderArray", startTime, System.nanoTime());
 
-        assertTrue(parser.getExceptionsHandler().size() == 0);
+        assertEquals(0, parser.getExceptionsHandler().size());
         List<String[]> result = new ArrayList<>();
         queue.drainTo(result);
         assertEquals(107, result.size());

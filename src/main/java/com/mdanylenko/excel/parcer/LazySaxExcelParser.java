@@ -14,10 +14,10 @@ import com.mdanylenko.excel.parcer.handler.ArraySaxHandler;
 import com.mdanylenko.excel.parcer.handler.SaxSheetHandler;
 import com.mdanylenko.excel.parcer.handler.SaxWithHeaderSheetHandler;
 import com.mdanylenko.excel.parcer.handler.WorkBookHandler;
-import org.apache.poi.POIXMLDocument;
 import org.apache.poi.openxml4j.exceptions.OpenXML4JException;
 import org.apache.poi.openxml4j.opc.OPCPackage;
 import org.apache.poi.openxml4j.opc.PackagePart;
+import org.apache.poi.poifs.filesystem.FileMagic;
 import org.apache.poi.xssf.eventusermodel.XSSFReader;
 import org.apache.poi.xssf.model.SharedStringsTable;
 import org.xml.sax.InputSource;
@@ -25,10 +25,15 @@ import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
 import org.xml.sax.helpers.XMLReaderFactory;
 
+import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
-import java.io.*;
+import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.lang.reflect.Field;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
@@ -40,12 +45,6 @@ import static com.mdanylenko.excel.util.StringUtil.isEmpty;
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 
-/**
- * Created by IntelliJ IDEA.<br/> * User: Max Danylenko<br/>
- * Date: 26.11.2015<br/>
- * Time: 16:07<br/>
- * To change this template use File | Settings | File Templates.
- */
 public class LazySaxExcelParser implements SheetParser {
 
     private List<Throwable> exceptionsHandler;
@@ -57,8 +56,8 @@ public class LazySaxExcelParser implements SheetParser {
     private BlockingQueue blockingQueue;
 
     public LazySaxExcelParser(File file) throws ConfigException {
-        try (InputStream inputStream = new BufferedInputStream(new FileInputStream(file))) {
-            if (!POIXMLDocument.hasOOXMLHeader(inputStream)) {
+        try (InputStream inputStream = new BufferedInputStream(Files.newInputStream(file.toPath()))) {
+            if (!FileMagic.valueOf(inputStream).equals(FileMagic.OOXML)) {
                 throw new ConfigException(FILE_TYPE_ERROR);
             }
         } catch (IOException e) {
@@ -81,8 +80,8 @@ public class LazySaxExcelParser implements SheetParser {
         this.blockingQueue = blockingQueue;
 
 
-        if(type.isArray()){
-            if( type.getName().contains("String") || type.getName().contains("Object") ){
+        if (type.isArray()) {
+            if (type.getName().contains("String") || type.getName().contains("Object")) {
                 this.sheetDescription = new SheetDescription();
                 this.sheetDescription.setHeader(isHeader);
                 this.sheetDescription.setType(type);
@@ -90,20 +89,20 @@ public class LazySaxExcelParser implements SheetParser {
                 Integer id = null;
                 String sheetName = null;
                 try {
-                    id = Integer.parseInt( sheet );
-                }catch (NumberFormatException ex){
+                    id = Integer.parseInt(sheet);
+                } catch (NumberFormatException ex) {
                     sheetName = sheet;
                 }
 
-                if( nonNull(id) ){
+                if (nonNull(id)) {
                     this.sheetDescription.setSheetId(id.toString());
                 }
 
-                if( nonNull(sheetName) ){
+                if (nonNull(sheetName)) {
                     this.sheetDescription.setSheetName(sheetName);
                 }
 
-            }else{
+            } else {
                 throw new PrepareContextException(CONTEXT_CLASS_ARRAY_TYPE);
             }
         }
@@ -152,7 +151,7 @@ public class LazySaxExcelParser implements SheetParser {
         for (Field field : fields) {
             field.setAccessible(true);
             Column annotation = field.getDeclaredAnnotation(Column.class);
-            if( isNull(annotation) ){
+            if (isNull(annotation)) {
                 continue;
             }
 
@@ -197,52 +196,49 @@ public class LazySaxExcelParser implements SheetParser {
         return blockingQueue;
     }
 
-    private void selectSheet(){
+    private void selectSheet() {
 
     }
 
     @Override
-    public void parseSheet()  {
+    public void parseSheet() {
         processFinished.set(false);
 
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
+        new Thread(() -> {
+            try {
+
+                final String name = sheetDescription.getSheetName();
+
+                Integer id = null;
                 try {
-
-                    final  String name = sheetDescription.getSheetName();
-
-                    Integer id = null;
-                    try{
-                        id  = Integer.parseInt(sheetDescription.getSheetId());
-                    }catch (NumberFormatException e){
-                        System.out.println(e.getMessage());
-                    }
-
-                    InputStream sheet = isEmpty(name) ? getSheetById(id) : getSheetByName(name);
-                    OPCPackage pkg = OPCPackage.open(file);
-                    XSSFReader r = new XSSFReader(pkg);
-                    SharedStringsTable sst = r.getSharedStringsTable();
-
-                    XMLReader parser = null;
-                    if(sheetDescription.getType().isArray()){
-
-                        parser = getArraySaxParser(sst);
-
-                    }else{
-                        parser = sheetDescription.hasHeader() ? getSaxWithHeaderSheetParser(sst) : getSaxSheetParser(sst);
-                    }
-
-                    InputSource sheetSource = new InputSource(sheet);
-                    parser.parse(sheetSource);
-
-
-                } catch (Throwable e) {
-                    exceptionsHandler.add(new ParserException(e.getMessage(), e));
+                    id = Integer.parseInt(sheetDescription.getSheetId());
+                } catch (NumberFormatException e) {
+                    System.out.println(e.getMessage());
                 }
 
-                processFinished.set(true);
+                InputStream sheet = isEmpty(name) ? getSheetById(id) : getSheetByName(name);
+                OPCPackage pkg = OPCPackage.open(file);
+                XSSFReader r = new XSSFReader(pkg);
+                SharedStringsTable sst = (SharedStringsTable) r.getSharedStringsTable();
+
+                XMLReader parser = null;
+                if (sheetDescription.getType().isArray()) {
+
+                    parser = getArraySaxParser(sst);
+
+                } else {
+                    parser = sheetDescription.hasHeader() ? getSaxWithHeaderSheetParser(sst) : getSaxSheetParser(sst);
+                }
+
+                InputSource sheetSource = new InputSource(sheet);
+                parser.parse(sheetSource);
+
+
+            } catch (Throwable e) {
+                exceptionsHandler.add(new ParserException(e.getMessage(), e));
             }
+
+            processFinished.set(true);
         }).start();
     }
 
@@ -346,8 +342,8 @@ public class LazySaxExcelParser implements SheetParser {
         return parser;
     }
 
-    private XMLReader getArraySaxParser(SharedStringsTable sst) throws SAXException {
-        XMLReader parser = XMLReaderFactory.createXMLReader("org.apache.xerces.parsers.SAXParser");
+    private XMLReader getArraySaxParser(SharedStringsTable sst) throws SAXException, ParserConfigurationException {
+        XMLReader parser = SAXParserFactory.newInstance().newSAXParser().getXMLReader();
 
         ArraySaxHandler handler = new ArraySaxHandler(sst);
 

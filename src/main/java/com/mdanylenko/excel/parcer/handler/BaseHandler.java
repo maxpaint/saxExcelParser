@@ -1,6 +1,7 @@
 package com.mdanylenko.excel.parcer.handler;
 
 import com.mdanylenko.excel.model.XssfDataType;
+import org.apache.poi.ss.usermodel.RichTextString;
 import org.apache.poi.xssf.model.SharedStringsTable;
 import org.apache.poi.xssf.usermodel.XSSFRichTextString;
 import org.xml.sax.Attributes;
@@ -9,13 +10,6 @@ import org.xml.sax.helpers.DefaultHandler;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 
-/**
- * Created by IntelliJ IDEA.<br/>
- * User: Max Danylenko<br/>
- * Date: 21.12.2015<br/>
- * Time: 22:22<br/>
- * To change this template use File | Settings | File Templates.
- */
 public class BaseHandler extends DefaultHandler {
 
     protected XssfDataType nextDataType;
@@ -64,7 +58,7 @@ public class BaseHandler extends DefaultHandler {
             case SSTINDEX:
                 try {
                     int idx = Integer.parseInt(cellContent);
-                    XSSFRichTextString rtss = new XSSFRichTextString( sst.getEntryAt(idx) );
+                    RichTextString rtss = sst.getItemAt(idx);
                     cellContent =  rtss.toString();
                 } catch (NumberFormatException ex) {
                     System.out.println("Failed to parse SST index '" + cellContent + "': " + ex.toString());
@@ -72,14 +66,14 @@ public class BaseHandler extends DefaultHandler {
                 break;
 
             case NUMBER:
-                /*String n = value.toString();
+                /*String n = cellContent;
                 if (this.formatString != null)
                     thisStr = formatter.formatRawCellContents(Double
                                     .parseDouble(n), this.formatIndex,
                             this.formatString);
                 else
-                    thisStr = n;*/
-                break;
+                    thisStr = n;
+                break;*/
 
             default:
                 cellContent = "(TODO: Unexpected type: " + nextDataType + ")";
@@ -96,15 +90,10 @@ public class BaseHandler extends DefaultHandler {
     public Object createInnerInstance(Class<?> inner) throws IllegalAccessException, InvocationTargetException, InstantiationException, NoSuchMethodException, ClassNotFoundException {
         String baseName = inner.toString().replace("class ", "");
         baseName = baseName.substring(0, baseName.indexOf("$"));
-
         Class<?> enclosingClass = Class.forName(baseName);
         Object enclosingInstance = enclosingClass.newInstance();
-
         Constructor<?> ctor = inner.getDeclaredConstructor(enclosingClass);
-
-        Object innerInstance = ctor.newInstance(enclosingInstance);
-
-        return innerInstance;
+        return ctor.newInstance(enclosingInstance);
 
     }
 }

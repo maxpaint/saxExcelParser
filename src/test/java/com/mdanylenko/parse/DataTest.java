@@ -24,18 +24,11 @@ import java.nio.file.Paths;
 import java.util.*;
 import java.util.concurrent.BlockingQueue;
 
-/**
- * Created by IntelliJ IDEA.<br/>
- * User: Max Danylenko<br/>
- * Date: 22.12.2015<br/>
- * Time: 21:25<br/>
- * To change this template use File | Settings | File Templates.
- */
 public class DataTest extends BaseTest {
 
     private File excelFile;
 
-    private Map<String, Object[]> data  = getData();
+    private Map<String, Object[]> data = getData();
 
 
     @Before
@@ -89,14 +82,14 @@ public class DataTest extends BaseTest {
 
         executiveTime("withoutHeader", startTime, System.nanoTime());
 
-        assertTrue(parser.getExceptionsHandler().size() == 0);
+        assertEquals(0, parser.getExceptionsHandler().size());
         List<TestDTO> result = new ArrayList<>();
         queue.drainTo(result);
         assertEquals(3, result.size());
 
         for (int i = 2; i < 5; i++) {
-            TestDTO dto = result.get(i-2);
-            Object[] objects = data.get(String.valueOf(i) );
+            TestDTO dto = result.get(i - 2);
+            Object[] objects = data.get(String.valueOf(i));
             assertEquals(objects[0], dto.getNo());
             assertEquals(objects[1], dto.getName());
             assertEquals(objects[2], dto.getSalary());
@@ -105,8 +98,8 @@ public class DataTest extends BaseTest {
     }
 
     @After
-    public void deleteFile(){
-        if( !excelFile.delete() ){
+    public void deleteFile() {
+        if (!excelFile.delete()) {
             excelFile.deleteOnExit();
         }
     }
@@ -128,7 +121,7 @@ public class DataTest extends BaseTest {
         return filePath.toFile();
     }
 
-    private Map<String, Object[]> getData(){
+    private Map<String, Object[]> getData() {
         Map<String, Object[]> data = new HashMap<String, Object[]>();
         data.put("1", new Object[]{"Emp No.", "Name", "Salary"});
         data.put("2", new Object[]{1d, "John", 1500000d});

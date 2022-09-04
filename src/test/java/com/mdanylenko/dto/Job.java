@@ -4,13 +4,6 @@ import com.mdanylenko.excel.annotation.Column;
 import com.mdanylenko.excel.annotation.Sheet;
 import com.mdanylenko.excel.converter.IntegerConverter;
 
-/**
- * Created by IntelliJ IDEA.<br/>
- * User:  Max Danylenko<br/>
- * Date: 10.12.2015<br/>
- * Time: 14:27<br/>
- * To change this template use File | Settings | File Templates.
- */
 @Sheet(
         sheetId = "3",
         hasHeader = true

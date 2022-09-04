@@ -6,15 +6,10 @@ import com.mdanylenko.excel.exception.PrepareContextException;
 import junit.framework.Assert;
 import org.junit.Test;
 
-/**
- * Created by IntelliJ IDEA.<br/>
- * User: Max Danylenko<br/>
- * Date: 05.12.2015<br/>
- * Time: 13:41<br/>
- * To change this template use File | Settings | File Templates.
- */
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
-public class ContextTest  extends Assert {
+public class ContextTest {
 
 
     @Test
@@ -29,7 +24,7 @@ public class ContextTest  extends Assert {
             error = e.getMessage();
         }
 
-        assertTrue(error.contains(errorMessage));
+        assertEquals(true, error.contains(errorMessage));
     }
 
     @Test
@@ -45,12 +40,6 @@ public class ContextTest  extends Assert {
         }
 
         assertTrue(error.contains(errorMessage));
-    }
-
-    @Test
-    public void positiveAnnotation() throws PrepareContextException {
-            ExcelContext context = ExcelContext.prepareContext("com.mdanylenko.dto");
-
     }
 
 }

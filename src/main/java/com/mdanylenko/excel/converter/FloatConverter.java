@@ -5,13 +5,6 @@ import com.mdanylenko.excel.exception.TypeCastException;
 import static com.mdanylenko.excel.util.StringUtil.isEmpty;
 import static java.util.Objects.isNull;
 
-/**
- * Created by IntelliJ IDEA.<br/>
- * User:  Max Danylenko<br/>
- * Date: 10.12.2015<br/>
- * Time: 16:03<br/>
- * To change this template use File | Settings | File Templates.
- */
 public class FloatConverter implements TypeConverter<Float> {
 
     @Override

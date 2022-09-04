@@ -22,13 +22,6 @@ import static com.mdanylenko.excel.exception.ErrorCode.REQURED_ERROR;
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 
-/**
- * Created by IntelliJ IDEA.<br/>
- * User: Max Danylenko<br/>
- * Date: 19.12.2015<br/>
- * Time: 13:44<br/>
- * To change this template use File | Settings | File Templates.
- */
 public class SaxSheetHandler extends BaseHandler {
 
 private List<Throwable> exceptionsHandler;

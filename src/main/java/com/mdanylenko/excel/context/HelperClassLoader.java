@@ -13,13 +13,6 @@ import java.util.Set;
 
 import static java.util.Objects.nonNull;
 
-/**
- * Created by IntelliJ IDEA.<br/>
- * User: Max Danylenko<br/>
- * Date: 08.12.2015<br/>
- * Time: 18:35<br/>
- * To change this template use File | Settings | File Templates.
- */
 public class HelperClassLoader {
 
     private Set<Class<?>> classNames;

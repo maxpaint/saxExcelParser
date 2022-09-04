@@ -1,12 +1,5 @@
 package com.mdanylenko.excel.exception;
 
-/**
- * Created by IntelliJ IDEA.<br/>
- * User:  Max Danylenko<br/>
- * Date: 10.12.2015<br/>
- * Time: 16:30<br/>
- * To change this template use File | Settings | File Templates.
- */
 public class TypeCastException extends Throwable {
 
     public TypeCastException(String message) {

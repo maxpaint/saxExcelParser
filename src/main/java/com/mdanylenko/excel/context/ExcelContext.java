@@ -11,13 +11,6 @@ import java.util.Set;
 
 import static com.mdanylenko.excel.exception.ErrorCode.CONTEXT_CLASS_DEFINE;
 
-/**
- * Created by IntelliJ IDEA.<br/>
- * User: Max Danylenko<br/>
- * Date: 27.11.2015<br/>
- * Time: 21:21<br/>
- * To change this template use File | Settings | File Templates.
- */
 public class ExcelContext {
 
     private  Set<Class<?>> classes;

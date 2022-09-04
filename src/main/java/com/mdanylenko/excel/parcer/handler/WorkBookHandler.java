@@ -8,13 +8,6 @@ import org.xml.sax.helpers.DefaultHandler;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Created by IntelliJ IDEA.<br/>
- * User: Max Danylenko<br/>
- * Date: 11.12.2015<br/>
- * Time: 22:28<br/>
- * To change this template use File | Settings | File Templates.
- */
 public class WorkBookHandler extends DefaultHandler {
 
     private List<SheetDesc> sheets = new ArrayList<>();

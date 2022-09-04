@@ -4,13 +4,6 @@ import com.mdanylenko.excel.converter.TypeConverter;
 
 import java.lang.reflect.Field;
 
-/**
- * Created by IntelliJ IDEA.<br/>
- * User: Max Danylenko<br/>
- * Date: 29.11.2015<br/>
- * Time: 19:05<br/>
- * To change this template use File | Settings | File Templates.
- */
 public class ColumnDescription {
 
     private Field field;
