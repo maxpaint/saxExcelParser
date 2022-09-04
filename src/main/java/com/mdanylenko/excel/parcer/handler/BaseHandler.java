@@ -1,6 +1,7 @@
 package com.mdanylenko.excel.parcer.handler;
 
 import com.mdanylenko.excel.model.XssfDataType;
+import org.apache.poi.ss.usermodel.DataFormatter;
 import org.apache.poi.ss.usermodel.RichTextString;
 import org.apache.poi.xssf.model.SharedStringsTable;
 import org.apache.poi.xssf.usermodel.XSSFRichTextString;
@@ -13,6 +14,8 @@ import java.lang.reflect.InvocationTargetException;
 public class BaseHandler extends DefaultHandler {
 
     protected XssfDataType nextDataType;
+
+    private DataFormatter formatter = new DataFormatter();
 
     protected void setType(Attributes attributes){
         // Set up defaults.
@@ -66,14 +69,8 @@ public class BaseHandler extends DefaultHandler {
                 break;
 
             case NUMBER:
-                /*String n = cellContent;
-                if (this.formatString != null)
-                    thisStr = formatter.formatRawCellContents(Double
-                                    .parseDouble(n), this.formatIndex,
-                            this.formatString);
-                else
-                    thisStr = n;
-                break;*/
+                break;
+
 
             default:
                 cellContent = "(TODO: Unexpected type: " + nextDataType + ")";

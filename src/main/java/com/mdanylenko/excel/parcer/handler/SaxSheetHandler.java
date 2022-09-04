@@ -24,150 +24,150 @@ import static java.util.Objects.nonNull;
 
 public class SaxSheetHandler extends BaseHandler {
 
-private List<Throwable> exceptionsHandler;
+    private List<Throwable> exceptionsHandler;
 
-private String columnName = "";
-private Set<Field> reguiredFields = new HashSet<>();
-private Map<Field, ColumnDescription> defaultFields = new HashMap<>();
-private int rowNumber;
-private boolean isEmpty = true;
-private Map<String, ColumnDescription> columnMap;
-private Object row;
+    private String columnName = "";
+    private Set<Field> reguiredFields = new HashSet<>();
+    private Map<Field, ColumnDescription> defaultFields = new HashMap<>();
+    private int rowNumber;
+    private boolean isEmpty = true;
+    private Map<String, ColumnDescription> columnMap;
+    private Object row;
 
-private SharedStringsTable sst;
-private StringBuffer cellContent = new StringBuffer();
-private boolean nextIsValue;
+    private SharedStringsTable sst;
+    private StringBuffer cellContent = new StringBuffer();
+    private boolean nextIsValue;
 
-private BlockingQueue blockingQueue;
-private SheetDescription sheetDescription;
+    private BlockingQueue blockingQueue;
+    private SheetDescription sheetDescription;
 
-        public SaxSheetHandler(SharedStringsTable sst) {
-            this.sst = sst;
-            this.columnMap = new HashMap<>();
+    public SaxSheetHandler(SharedStringsTable sst) {
+        this.sst = sst;
+        this.columnMap = new HashMap<>();
+    }
+
+    public void startElement(String uri, String localName, String name, Attributes attributes) throws SAXException {
+        if (this.columnMap.isEmpty()) {
+            this.columnMap = sheetDescription.getColumnMap();
         }
 
-        public void startElement(String uri, String localName, String name, Attributes attributes) throws SAXException {
-            if(this.columnMap.isEmpty()){
-                this.columnMap = sheetDescription.getColumnMap();
+        if (name.equals("row")) {
+            String rowStringNumber = attributes.getValue("r");
+            rowNumber = Integer.parseInt(rowStringNumber);
+            isEmpty = true;
+            try {
+                row = sheetDescription.getType().newInstance();
+            } catch (IllegalAccessException | InstantiationException e) {
+                exceptionsHandler.add(e);
             }
+        }
 
-            if(name.equals("row")){
-                String rowStringNumber = attributes.getValue("r");
-                rowNumber = Integer.parseInt(rowStringNumber);
-                isEmpty = true;
-                try {
-                    row = sheetDescription.getType().newInstance();
-                } catch (IllegalAccessException | InstantiationException e) {
-                    exceptionsHandler.add(e);
-                }
-            }
-
-            if ("inlineStr".equals(name) || "v".equals(name)) {
-                nextIsValue = true;
-                // Clear contents cache
-                cellContent.setLength(0);
-            }
-
-            // c => cell
-            if(name.equals("c")) {
-                // Print the cell reference
-                String cellNumber = attributes.getValue("r");
-                columnName = cellNumber.replaceAll("\\d", "");
-
-                setType(attributes);
-
-            }
+        if ("inlineStr".equals(name) || "v".equals(name)) {
+            nextIsValue = true;
             // Clear contents cache
             cellContent.setLength(0);
         }
 
-        public void endElement(String uri, String localName, String name) throws SAXException {
+        // c => cell
+        if (name.equals("c")) {
+            // Print the cell reference
+            String cellNumber = attributes.getValue("r");
+            columnName = cellNumber.replaceAll("\\d", "");
 
-            if(name.equals("row")){
-                if( !isEmpty ){
-                    try {
-                        for(Field field : reguiredFields){
-                            if(isNull(field.get(row))){
-                                Column column = field.getDeclaredAnnotation(Column.class);
-                                exceptionsHandler.add(new ParserException(String.format(REQURED_ERROR, column.columnName(), rowNumber)));
-                                return;
-                            }
-                        }
+            setType(attributes);
 
-                        for(Map.Entry<Field, ColumnDescription> entry : defaultFields.entrySet()){
-                            Field field = entry.getKey();
-                            ColumnDescription desc = entry.getValue();
+        }
+        // Clear contents cache
+        cellContent.setLength(0);
+    }
 
-                            if(isNull(field.get(row))){
-                                try {
-                                    TypeConverter converter = desc.getConverter();
-                                    if( converter instanceof DateTypeConverter){
-                                        DateTypeConverter dateConverter = (DateTypeConverter) converter;
-                                        Column column = field.getAnnotation(Column.class);
-                                        field.set(row, dateConverter.convert(desc.getDefaultValue(), column.format()));
-                                    }else{
-                                        field.set(row, converter.convert(desc.getDefaultValue()));
-                                    }
-                                } catch (TypeCastException e) {
-                                    exceptionsHandler.add(new TypeCastException(String.format(ErrorCode.CAST_ERROR, desc.getConverter(), field, cellContent), e));
-                                }
-                            }
-                        }
+    public void endElement(String uri, String localName, String name) throws SAXException {
 
-                        blockingQueue.put(row);
-                    } catch (IllegalAccessException | InterruptedException e) {
-                        exceptionsHandler.add(e);
-                    }
-                }
-            }
-
-            // v => contents of a cell
-            // Output after we've seen the string contents
-            if(name.equals("v") || name.equals("t")) {//&& !StringUtil.isEmpty(cellContent)
-                isEmpty = false;
-
-                String value = getTypeData(cellContent.toString(), sst);
-
-                ColumnDescription description = columnMap.get(columnName);
+        if (name.equals("row")) {
+            if (!isEmpty) {
                 try {
-                    if(nonNull(description)){
-                        Field field = description.getField();
-                        TypeConverter converter = description.getConverter();
-                        try {
-                            if( converter instanceof DateTypeConverter){
-                                DateTypeConverter dateConverter = (DateTypeConverter) converter;
-                                Column column = field.getAnnotation(Column.class);
-                                field.set(row, dateConverter.convert(value, column.format()));
-                            }else{
-                                field.set(row, converter.convert(value));
-                            }
-
-                        } catch (TypeCastException e) {
-                            exceptionsHandler.add(new TypeCastException(String.format(ErrorCode.CAST_ERROR, converter, field, value ), e));
+                    for (Field field : reguiredFields) {
+                        if (isNull(field.get(row))) {
+                            Column column = field.getDeclaredAnnotation(Column.class);
+                            exceptionsHandler.add(new ParserException(String.format(REQURED_ERROR, column.columnName(), rowNumber)));
+                            return;
                         }
                     }
 
+                    for (Map.Entry<Field, ColumnDescription> entry : defaultFields.entrySet()) {
+                        Field field = entry.getKey();
+                        ColumnDescription desc = entry.getValue();
 
-                }  catch (IllegalAccessException e) {
+                        if (isNull(field.get(row))) {
+                            try {
+                                TypeConverter converter = desc.getConverter();
+                                if (converter instanceof DateTypeConverter) {
+                                    DateTypeConverter dateConverter = (DateTypeConverter) converter;
+                                    Column column = field.getAnnotation(Column.class);
+                                    field.set(row, dateConverter.convert(desc.getDefaultValue(), column.format()));
+                                } else {
+                                    field.set(row, converter.convert(desc.getDefaultValue()));
+                                }
+                            } catch (TypeCastException e) {
+                                exceptionsHandler.add(new TypeCastException(String.format(ErrorCode.CAST_ERROR, desc.getConverter(), field, cellContent), e));
+                            }
+                        }
+                    }
+
+                    blockingQueue.put(row);
+                } catch (IllegalAccessException | InterruptedException e) {
                     exceptionsHandler.add(e);
                 }
             }
         }
 
-        public void characters(char[] ch, int start, int length) throws SAXException {
-            if (nextIsValue)
-                cellContent.append( ch, start, length );
-        }
+        // v => contents of a cell
+        // Output after we've seen the string contents
+        if (name.equals("v") || name.equals("t")) {//&& !StringUtil.isEmpty(cellContent)
+            isEmpty = false;
 
-        public void setBlockingQueue(BlockingQueue blockingQueue) {
-            this.blockingQueue = blockingQueue;
-        }
+            String value = getTypeData(cellContent.toString(), sst);
 
-        public void setSheetDescription(SheetDescription sheetDescription) {
-            this.sheetDescription = sheetDescription;
-        }
+            ColumnDescription description = columnMap.get(columnName);
+            try {
+                if (nonNull(description)) {
+                    Field field = description.getField();
+                    TypeConverter converter = description.getConverter();
+                    try {
+                        if (converter instanceof DateTypeConverter) {
+                            DateTypeConverter dateConverter = (DateTypeConverter) converter;
+                            Column column = field.getAnnotation(Column.class);
+                            field.set(row, dateConverter.convert(value, column.format()));
+                        } else {
+                            field.set(row, converter.convert(value));
+                        }
 
-        public void setExceptionsHandler(List<Throwable> exceptionsHandler) {
-            this.exceptionsHandler = exceptionsHandler;
+                    } catch (TypeCastException e) {
+                        exceptionsHandler.add(new TypeCastException(String.format(ErrorCode.CAST_ERROR, converter, field, value), e));
+                    }
+                }
+
+
+            } catch (IllegalAccessException e) {
+                exceptionsHandler.add(e);
+            }
         }
+    }
+
+    public void characters(char[] ch, int start, int length) throws SAXException {
+        if (nextIsValue)
+            cellContent.append(ch, start, length);
+    }
+
+    public void setBlockingQueue(BlockingQueue blockingQueue) {
+        this.blockingQueue = blockingQueue;
+    }
+
+    public void setSheetDescription(SheetDescription sheetDescription) {
+        this.sheetDescription = sheetDescription;
+    }
+
+    public void setExceptionsHandler(List<Throwable> exceptionsHandler) {
+        this.exceptionsHandler = exceptionsHandler;
+    }
 }

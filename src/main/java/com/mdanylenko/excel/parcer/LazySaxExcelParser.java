@@ -316,8 +316,8 @@ public class LazySaxExcelParser implements SheetParser {
     }
 
 
-    private XMLReader getSaxWithHeaderSheetParser(SharedStringsTable sst) throws SAXException {
-        XMLReader parser = XMLReaderFactory.createXMLReader("org.apache.xerces.parsers.SAXParser");
+    private XMLReader getSaxWithHeaderSheetParser(SharedStringsTable sst) throws SAXException, ParserConfigurationException {
+        XMLReader parser = SAXParserFactory.newInstance().newSAXParser().getXMLReader();
 
         SaxWithHeaderSheetHandler handler = new SaxWithHeaderSheetHandler(sst);
 
@@ -329,8 +329,8 @@ public class LazySaxExcelParser implements SheetParser {
         return parser;
     }
 
-    private XMLReader getSaxSheetParser(SharedStringsTable sst) throws SAXException {
-        XMLReader parser = XMLReaderFactory.createXMLReader("org.apache.xerces.parsers.SAXParser");
+    private XMLReader getSaxSheetParser(SharedStringsTable sst) throws SAXException, ParserConfigurationException {
+        XMLReader parser = SAXParserFactory.newInstance().newSAXParser().getXMLReader();
 
         SaxSheetHandler handler = new SaxSheetHandler(sst);
 

@@ -9,13 +9,13 @@ public class IntegerConverter implements TypeConverter<Integer> {
 
     @Override
     public Integer convert(String value) throws TypeCastException {
-        if(isEmpty(value)){
+        if (isEmpty(value)) {
             return null;
         }
 
-        try{
+        try {
             return Integer.parseInt(value);
-        }catch (Throwable e){
+        } catch (Throwable e) {
             throw new TypeCastException(e.getMessage(), e);
         }
     }
