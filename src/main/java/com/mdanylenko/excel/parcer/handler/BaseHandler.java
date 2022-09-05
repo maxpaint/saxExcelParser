@@ -1,7 +1,6 @@
 package com.mdanylenko.excel.parcer.handler;
 
 import com.mdanylenko.excel.model.XssfDataType;
-import org.apache.poi.ss.usermodel.DataFormatter;
 import org.apache.poi.ss.usermodel.RichTextString;
 import org.apache.poi.xssf.model.SharedStringsTable;
 import org.apache.poi.xssf.usermodel.XSSFRichTextString;
@@ -15,9 +14,7 @@ public class BaseHandler extends DefaultHandler {
 
     protected XssfDataType nextDataType;
 
-    private DataFormatter formatter = new DataFormatter();
-
-    protected void setType(Attributes attributes){
+    protected void setType(Attributes attributes) {
         // Set up defaults.
         this.nextDataType = XssfDataType.NUMBER;
         String cellType = attributes.getValue("t");
@@ -34,7 +31,7 @@ public class BaseHandler extends DefaultHandler {
 
     }
 
-    protected String getTypeData(String cellContent, SharedStringsTable sst){
+    protected String getTypeData(String cellContent, SharedStringsTable sst) {
 
         switch (nextDataType) {
 
@@ -62,7 +59,7 @@ public class BaseHandler extends DefaultHandler {
                 try {
                     int idx = Integer.parseInt(cellContent);
                     RichTextString rtss = sst.getItemAt(idx);
-                    cellContent =  rtss.toString();
+                    cellContent = rtss.toString();
                 } catch (NumberFormatException ex) {
                     System.out.println("Failed to parse SST index '" + cellContent + "': " + ex.toString());
                 }
@@ -80,7 +77,7 @@ public class BaseHandler extends DefaultHandler {
         return cellContent;
     }
 
-    public Boolean isInner(Class<?>  clazz){
+    public Boolean isInner(Class<?> clazz) {
         return clazz.toString().contains("$");
     }
 
@@ -88,7 +85,7 @@ public class BaseHandler extends DefaultHandler {
         String baseName = inner.toString().replace("class ", "");
         baseName = baseName.substring(0, baseName.indexOf("$"));
         Class<?> enclosingClass = Class.forName(baseName);
-        Object enclosingInstance = enclosingClass.newInstance();
+        Object enclosingInstance = enclosingClass.getDeclaredConstructor().newInstance();
         Constructor<?> ctor = inner.getDeclaredConstructor(enclosingClass);
         return ctor.newInstance(enclosingInstance);
 

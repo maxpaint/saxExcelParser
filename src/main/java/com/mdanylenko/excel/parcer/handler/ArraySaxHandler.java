@@ -1,25 +1,18 @@
 package com.mdanylenko.excel.parcer.handler;
 
-import com.mdanylenko.excel.model.ColumnDescription;
 import com.mdanylenko.excel.model.SheetDescription;
 import org.apache.poi.xssf.model.SharedStringsTable;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 
-import java.lang.reflect.Field;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.BlockingQueue;
 
 public class ArraySaxHandler  extends BaseHandler {
 
     private List<Throwable> exceptionsHandler;
-
-    private String columnName = "";
-    private Set<Field> reguiredFields = new HashSet<>();
-    private Map<Field, ColumnDescription> defaultFields = new HashMap<>();
-    private int rowNumber;
     private boolean isEmpty = true;
-    private Map<String, ColumnDescription> columnMap;
     private List row;
 
     private SharedStringsTable sst;
@@ -31,15 +24,12 @@ public class ArraySaxHandler  extends BaseHandler {
 
     public ArraySaxHandler(SharedStringsTable sst) {
         this.sst = sst;
-        this.columnMap = new HashMap<>();
-
     }
 
-    public void startElement(String uri, String localName, String name, Attributes attributes) throws SAXException {
+    public void startElement(String uri, String localName, String name, Attributes attributes) {
 
         if(name.equals("row")){
             String rowStringNumber = attributes.getValue("r");
-            rowNumber = Integer.parseInt(rowStringNumber);
             isEmpty = true;
             row = new ArrayList<>();
         }
@@ -54,7 +44,7 @@ public class ArraySaxHandler  extends BaseHandler {
         if(name.equals("c")) {
             // Print the cell reference
             String cellNumber = attributes.getValue("r");
-            columnName = cellNumber.replaceAll("\\d", "");
+            String columnName = cellNumber.replaceAll("\\d", "");
             // Figure out if the value is an index in the SST
 
             setType(attributes);
@@ -64,7 +54,7 @@ public class ArraySaxHandler  extends BaseHandler {
         cellContent.setLength(0);
     }
 
-    public void endElement(String uri, String localName, String name) throws SAXException {
+    public void endElement(String uri, String localName, String name) {
         if(name.equals("row")){
             if(!isEmpty){
                 try {
@@ -96,11 +86,11 @@ public class ArraySaxHandler  extends BaseHandler {
         this.blockingQueue = blockingQueue;
     }
 
-    public void setSheetDescription(SheetDescription sheetDescription) {
-        this.sheetDescription = sheetDescription;
-    }
-
     public void setExceptionsHandler(List<Throwable> exceptionsHandler) {
         this.exceptionsHandler = exceptionsHandler;
+    }
+
+    public void setSheetDescription(SheetDescription sheetDescription) {
+        this.sheetDescription = sheetDescription;
     }
 }

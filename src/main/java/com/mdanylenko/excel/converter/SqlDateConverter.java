@@ -11,7 +11,7 @@ import static com.mdanylenko.excel.util.StringUtil.isEmpty;
 
 public class SqlDateConverter implements DateTypeConverter<Date> {
 
-    private SimpleDateFormat defaultFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH);
+    private final SimpleDateFormat defaultFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH);
 
     @Override
     public Date convert(String value) throws TypeCastException {

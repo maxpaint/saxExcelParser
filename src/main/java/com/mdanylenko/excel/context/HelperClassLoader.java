@@ -49,6 +49,7 @@ public class HelperClassLoader {
 
             if(folderScan.isDirectory()){
                 File[] classes = folderScan.listFiles();
+                assert classes != null;
                 for (File clazz : classes){
                     if(clazz.isFile()){
                         String name = getClassName(clazz, path);

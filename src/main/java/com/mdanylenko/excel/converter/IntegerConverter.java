@@ -1,7 +1,6 @@
 package com.mdanylenko.excel.converter;
 
 import com.mdanylenko.excel.exception.TypeCastException;
-import com.mdanylenko.excel.util.StringUtil;
 
 import static com.mdanylenko.excel.util.StringUtil.isEmpty;
 

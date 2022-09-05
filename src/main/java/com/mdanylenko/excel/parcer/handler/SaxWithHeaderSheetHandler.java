@@ -8,13 +8,9 @@ import com.mdanylenko.excel.exception.ParserException;
 import com.mdanylenko.excel.exception.TypeCastException;
 import com.mdanylenko.excel.model.ColumnDescription;
 import com.mdanylenko.excel.model.SheetDescription;
-import org.apache.poi.hssf.usermodel.HSSFWorkbook;
-import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.xssf.model.SharedStringsTable;
-import org.apache.poi.xssf.usermodel.XSSFRichTextString;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
-import org.xml.sax.helpers.DefaultHandler;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -30,11 +26,11 @@ public class SaxWithHeaderSheetHandler extends BaseHandler {
     private List<Throwable> exceptionsHandler;
 
     private String columnName = "";
-    private Set<Field> reguiredFields = new HashSet<>();
-    private Map<Field, ColumnDescription> defaultFields = new HashMap<>();
+    private final Set<Field> reguiredFields = new HashSet<>();
+    private final Map<Field, ColumnDescription> defaultFields = new HashMap<>();
     private int rowNumber;
     private boolean isEmpty = true;
-    private Map<String, ColumnDescription> columnMap;
+    private final Map<String, ColumnDescription> columnMap;
     private Object row;
 
     private SharedStringsTable sst;

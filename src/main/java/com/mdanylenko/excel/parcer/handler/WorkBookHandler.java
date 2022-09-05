@@ -11,13 +11,11 @@ import java.util.List;
 public class WorkBookHandler extends DefaultHandler {
 
     private List<SheetDesc> sheets = new ArrayList<>();
-    private String content;
-    private SheetDesc sheetDesc;
 
-    public void startElement(String uri, String localName, String name, Attributes attributes) throws SAXException {
+    public void startElement(String uri, String localName, String name, Attributes attributes) {
 
         if (name.equals("sheet")) {
-            sheetDesc = new SheetDesc();
+            SheetDesc sheetDesc = new SheetDesc();
 
             sheetDesc.setSheedId(Integer.parseInt(attributes.getValue("sheetId")));
             sheetDesc.setSheedName(attributes.getValue("name"));
@@ -27,19 +25,7 @@ public class WorkBookHandler extends DefaultHandler {
         }
     }
 
-    public void endElement(String uri, String localName, String name) throws SAXException {
-
-    }
-
-    public void characters(char[] ch, int start, int length) throws SAXException {
-        content += new String(ch, start, length);
-    }
-
     public List<SheetDesc> getSheets() {
         return sheets;
-    }
-
-    public void setSheets(List<SheetDesc> sheets) {
-        this.sheets = sheets;
     }
 }

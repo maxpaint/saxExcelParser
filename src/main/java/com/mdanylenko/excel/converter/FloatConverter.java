@@ -3,7 +3,6 @@ package com.mdanylenko.excel.converter;
 import com.mdanylenko.excel.exception.TypeCastException;
 
 import static com.mdanylenko.excel.util.StringUtil.isEmpty;
-import static java.util.Objects.isNull;
 
 public class FloatConverter implements TypeConverter<Float> {
 

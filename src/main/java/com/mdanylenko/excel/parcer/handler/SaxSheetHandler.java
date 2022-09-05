@@ -81,7 +81,7 @@ public class SaxSheetHandler extends BaseHandler {
         cellContent.setLength(0);
     }
 
-    public void endElement(String uri, String localName, String name) throws SAXException {
+    public void endElement(String uri, String localName, String name) {
 
         if (name.equals("row")) {
             if (!isEmpty) {
